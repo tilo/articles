@@ -1,0 +1,22 @@
+name: Publish to dev.to
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.md'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish articles to dev.to
+        uses: sinedied/publish-devto@v2
+        with:
+          files: 'ruby/**/*.md'
+          devto_key: ${{ secrets.DEVTO_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          conventional_commits: false
