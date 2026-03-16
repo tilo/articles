@@ -37,6 +37,8 @@ _Benchmarks: 19 CSV files (20k–80k rows), Ruby 3.4.7, Apple M1, SmarterCSV 1.1
 
 The `CSV.table` comparison is the fair one — both return symbol-keyed hashes. `CSV.read` returns raw arrays, so the post-processing work your application still needs to do is not included in that number, understating the real cost difference.
 
+![SmarterCSV 1.16.0 vs Ruby CSV 3.3.5 speedup](https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/switch-from-ruby_csv-to-smarter_csv-in-5-minutes/images/SmarterCSV_1.16.0_vs_RubyCSV_3.3.5_speedup.png)
+
 ---
 
 ## Step 1: Install
