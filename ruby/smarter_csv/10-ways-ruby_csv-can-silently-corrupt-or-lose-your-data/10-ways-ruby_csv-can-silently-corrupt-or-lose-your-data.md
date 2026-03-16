@@ -395,7 +395,7 @@ rows[1]   # => {name: "Bob",   note: "Normal note"}
 A single unclosed `"` anywhere in the file causes the parser to enter quoted-field mode and treat everything that follows — newlines included — as part of one field. **All remaining rows are swallowed into a single field value.**
 
 ```
-$ cat example8.csv
+$ cat example9.csv
 name,age
 "Alice,30
 Bob,25
@@ -403,7 +403,7 @@ Carol,40
 ```
 
 ```ruby
-rows = CSV.read('example8.csv', headers: true)
+rows = CSV.read('example9.csv', headers: true)
 rows.length         # => 1  (not 3)
 rows.first['name']  # => "Alice,30\nBob,25\nCarol,40"
 #                         ^^^ entire remainder of file in one field
@@ -416,7 +416,7 @@ On a large file this is an OOM risk: the parser accumulates an ever-growing stri
 **SmarterCSV:** `field_size_limit: N` raises `SmarterCSV::FieldSizeLimitExceeded` as soon as any field or accumulating multiline buffer exceeds N bytes — the parse stops immediately. Additionally, `quote_boundary: :standard` (the default since 1.16.0) means mid-field quotes don't toggle quoted mode at all, reducing the attack surface.
 
 ```ruby
-good_rows = SmarterCSV.process('example8.csv',
+good_rows = SmarterCSV.process('example9.csv',
   field_size_limit: 10_000,
   on_bad_row: :collect,
 )
@@ -444,7 +444,7 @@ SmarterCSV.errors
 Or use `SmarterCSV::Reader` directly when you also need access to headers or other reader state:
 
 ```ruby
-reader = SmarterCSV::Reader.new('example8.csv',
+reader = SmarterCSV::Reader.new('example9.csv',
   field_size_limit: 10_000,
   on_bad_row: :collect,
 )
@@ -459,7 +459,7 @@ reader.errors   # same structure as above
 `CSV.read` assumes UTF-8. CSV files exported from Excel on Windows are typically Windows-1252 (CP1252), which encodes accented characters (é, ü, ñ) differently from UTF-8.
 
 ```
-$ cat example9.csv
+$ cat example10.csv
 last_name,first_name
 Müller,Hans
 ```
@@ -469,7 +469,7 @@ The file is saved in Windows-1252 encoding — `ü` is stored as `\xFC`, not as 
 **Scenario 1 — crash** (the better outcome — at least you know):
 
 ```ruby
-rows = CSV.read('example9.csv', headers: true)
+rows = CSV.read('example10.csv', headers: true)
 # => Encoding::InvalidByteSequenceError: "\xFC" from ASCII-8BIT to UTF-8
 ```
 
@@ -477,7 +477,7 @@ rows = CSV.read('example9.csv', headers: true)
 
 ```ruby
 # Specifying the wrong encoding suppresses the error
-rows = CSV.read('example9.csv', headers: true, encoding: 'binary')
+rows = CSV.read('example10.csv', headers: true, encoding: 'binary')
 rows.first['last_name']                # => "M\xFCller"  ← garbled string
 rows.first['last_name'].valid_encoding? # => true  ← Ruby thinks it's fine!
 ```
@@ -489,7 +489,7 @@ The mojibake string passes `.valid_encoding?`, passes database validations, gets
 **SmarterCSV:** `file_encoding:` accepts Ruby's `'external:internal'` transcoding notation; `force_utf8: true` transcodes to UTF-8 automatically; `invalid_byte_sequence:` controls the replacement character for bytes that can't be transcoded.
 
 ```ruby
-rows = SmarterCSV.process('example9.csv',
+rows = SmarterCSV.process('example10.csv',
   file_encoding: 'windows-1252:utf-8')
 rows.first[:last_name]   # => "Müller"
 ```
