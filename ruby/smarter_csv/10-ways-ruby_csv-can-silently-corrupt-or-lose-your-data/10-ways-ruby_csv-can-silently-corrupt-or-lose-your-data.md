@@ -31,7 +31,7 @@ This article documents ten reproducible ways `CSV.read` (and `CSV.table`) can si
 | 6 | Whitespace around values | `"active  " == "active"` → `false` — leading/trailing spaces or tabs cause status/type checks to silently return wrong results | by default ✅ | Default `strip_whitespace: true` strips all values; set `false` to preserve spaces |
 | 7 | `nil` vs `""` for empty fields | Unquoted empty → `nil`, quoted empty → `""` — inconsistent empty checks | by default ✅ | Default `remove_empty_values: true` removes both; `false` normalizes both to `""` |
 | 8 | Backslash-escaped quotes (MySQL/Unix) | `\"` treated as field-closing quote — crash or garbled data | by default ✅ | Default `quote_escaping: :auto` handles both RFC 4180 and backslash escaping |
-| 9 | TSV file read as CSV — one field per row | Default `col_sep: ","` on a tab-delimited file returns each row as a single string; all column structure lost | by default ✅ | Default `col_sep: :auto` detects the actual delimiter — no option needed |
+| 9 | TSV file read as CSV — completely breaks ❌ | Default `col_sep: ","` on a tab-delimited file returns each row as a single string; all column structure lost | by default ✅ | Default `col_sep: :auto` detects the actual delimiter — no option needed |
 | 10 | No encoding auto-detection | Non-UTF-8 files either crash or silently produce mojibake | via option | `file_encoding:`, `force_utf8: true`, `invalid_byte_sequence: ''` |
 
 ¹ Issue #4 can be triggered two ways: `CSV.table` enables `converters: :numeric` by default (no opt-in required), and `CSV.read` triggers the same corruption when passed `converters: :numeric` explicitly. Either way, any leading-zero string field — ZIP codes, customer IDs, product codes — is silently converted to a wrong integer.
@@ -57,6 +57,8 @@ The defensive post-processing code required to handle all ten cases correctly �
 > **Ready to switch?** → [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)
 
 Read on for a detailed explanation and reproducible example for each issue.
+
+> 💡 **Want to follow along?** Download the [example CSV files](https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data/images/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data-examples.tgz) and run the examples locally.
 
 
 ---
@@ -254,7 +256,7 @@ Alice,30
 ```ruby
 rows = CSV.read('example5.csv', headers: true).map(&:to_h)
 rows.first
-# => {" name " => "Alice", " age " => "30"}
+# => {" name " => "Alice", " age" => "30"}
 
 rows.first['name']   # => nil  ← silent miss; key is " name ", not "name"
 rows.first['age']    # => nil
@@ -378,20 +380,18 @@ Bob,"Normal note"
 
 ```ruby
 rows = CSV.read('example8.csv', headers: true)
-# => CSV::MalformedCSVError: Illegal quoting in line 2.
+# => CSV::MalformedCSVError: Any value after quoted field isn't allowed in line 2.
 ```
 
 **Scenario 2 — silent garbling** with `liberal_parsing: true`:
 
 ```ruby
 rows = CSV.read('example8.csv', headers: true, liberal_parsing: true)
-rows[0]['name']   # => "Alice"
-rows[0]['note']   # => "She said \\"   ← field closed at the backslash-quote; rest lost
-rows[1]['name']   # => "hello"          ← Alice's leftovers eaten as Bob's name
-rows[1]['note']   # => nil
+rows[0]['note']   # => "\"She said \\\"hello\\\" to everyone\""
+#                        ^^^ extra surrounding quotes — field was mis-parsed
 ```
 
-No exception. No warning. `rows.length` is still 2. The data just quietly moved to the wrong fields.
+No exception. No warning. The note field has extra wrapping quotes and mangled escaping — it won't compare, display, or serialize correctly.
 
 **`CSV.table` has the same problem** — and adding `liberal_parsing: true` makes it silently worse.
 
@@ -405,7 +405,7 @@ rows[1]   # => {name: "Bob",   note: "Normal note"}
 
 ---
 
-## 9. TSV File Read as CSV — One Field Per Row
+## 9. TSV File Read as CSV — Completely Breaks ❌
 
 `CSV.read` defaults to `col_sep: ","`. When given a tab-delimited file (TSV), it finds no commas and treats each entire row as a single field. The header row becomes one giant key; each data row becomes one giant value. All column structure is silently lost — no error, no warning, and `rows.length` looks correct.
 
@@ -425,7 +425,7 @@ rows.first['name']    # => nil  ← column unreachable
 rows.first.values     # => ["Alice\tNew York\t95"]  ← entire row is one value
 ```
 
-This is common when a pipeline switches file formats without updating the parser, or when a tool exports TSV instead of CSV without changing the extension.
+This can happen when users upload TSV instead of CSV - the file name could still be `.csv`, so indistinguishable from actual CSV data.
 
 **`CSV.table` has the same problem.**
 
@@ -459,7 +459,7 @@ The file is saved in Windows-1252 encoding — `ü` is stored as `\xFC`, not as 
 
 ```ruby
 rows = CSV.read('example10.csv', headers: true)
-# => Encoding::InvalidByteSequenceError: "\xFC" from ASCII-8BIT to UTF-8
+# => CSV::InvalidEncodingError: Invalid byte sequence in UTF-8 in line 2.
 ```
 
 **Scenario 2 — silent mojibake** (the worse outcome):
