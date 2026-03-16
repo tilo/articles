@@ -53,6 +53,7 @@ The defensive post-processing code required to handle all ten cases correctly â€
 
 Read on for a detailed explanation and reproducible example for each issue.
 
+
 ---
 
 ## 1. Extra Columns Without Headers â€” Values Silently Discarded
