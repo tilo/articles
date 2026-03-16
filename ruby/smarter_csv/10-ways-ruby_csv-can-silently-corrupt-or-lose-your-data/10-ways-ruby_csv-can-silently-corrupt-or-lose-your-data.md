@@ -3,7 +3,7 @@ title: 10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data
 published: false
 description: 'Ruby''s built-in CSV library has ten failure modes that produce no exception, no warning, and no indication anything went wrong. Your import runs, your tests pass, and your data is quietly wrong.'
 tags: 'ruby, csv, rails, programming'
-cover_image: null
+cover_image: https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data/images/10-ways-ruby_csv-can-corrupt-data.png
 slug: 10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data
 id: 3356453
 ---
