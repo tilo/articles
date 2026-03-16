@@ -81,7 +81,7 @@ rows.first
 #                 " Age" => "  30",
 #                    nil => " VIP"
 #                    ^^^^^^^^^^^^^
-#  "Gold" and the trailing empty field are silently lost
+#  data from unnamed column with "Gold" is silently lost
 # }
 ```
 
