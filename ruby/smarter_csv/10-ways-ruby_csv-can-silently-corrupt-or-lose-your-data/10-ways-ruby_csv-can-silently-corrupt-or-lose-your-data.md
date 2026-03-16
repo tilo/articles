@@ -1,6 +1,6 @@
 ---
 title: 10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data
-published: false
+published: true
 description: 'Ruby''s built-in CSV library has ten failure modes that produce no exception, no warning, and no indication anything went wrong. Your import runs, your tests pass, and your data is quietly wrong.'
 tags: 'ruby, csv, rails, programming'
 cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data/images/10-ways-ruby_csv-can-corrupt-data.png'
@@ -45,11 +45,13 @@ This article documents ten reproducible ways `CSV.read` (and `CSV.table`) can si
 
 The root cause is that `CSV.read` is a **tokenizer**, not a data pipeline. It splits bytes into fields and hands them back with no normalization, no validation, and no defensive handling of real-world messiness. Every assumption about what "clean" input looks like is left to the caller.
 
-`CSV.table` fixes exactly one issue out of ten — whitespace in headers — because its `:symbol` converter happens to call `.strip`. Everything else is identical or worse (issue #4 is caused by `CSV.table`'s default `converters: :numeric`).
+Issue #4 deserves special mention: `CSV.table`'s default `converters: :numeric` silently turns `"00123"` into `83`³ and `"01234"` into `668`³ — values that look like perfectly valid integers. ZIP codes, customer IDs, and product codes are quietly replaced with wrong numbers that pass every validation, get stored in your database, and are indistinguishable from real data until someone notices the numbers don't match.
 
 These aren't obscure edge cases. Extra columns, trailing commas, Windows-1252 encoding, duplicate headers, blank header cells, TSV-vs-CSV confusion, leading-zero identifiers, and whitespace-padded values are all common in CSV files exported from Excel, reporting tools, ERP systems, and legacy data pipelines. If your application accepts user-uploaded CSV files, you will encounter these.
 
 The defensive post-processing code required to handle all ten cases correctly — octal-safe numeric conversion, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, backslash quote escaping, delimiter auto-detection, encoding detection — is non-trivial to write, test, and maintain. Most applications never bother, because the failures are silent.
+
+³ These aren't rounding errors or truncations — they are completely different numbers. [Octal](https://en.wikipedia.org/wiki/Octal) is a base-8 number system from the early days of computing, still used in low-level Unix file permissions and C integer literals. It has no place in CSV data. No spreadsheet, ERP system, or database exports ZIP codes or customer IDs in octal — but Ruby CSV silently assumes that's exactly what a leading zero means.
 
 > **Ready to switch?** → [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby_csv-to-smarter_csv-in-5-minutes)
 
@@ -167,9 +169,11 @@ rows.first
 
 ## 4. `converters: :numeric` Silently Corrupts Leading-Zero Values as Octal
 
-`converters: :numeric` calls Ruby's `Integer()` on every field that looks like a number. Ruby's `Integer()` follows C literal conventions: **a leading zero means octal**. The result is not just "leading zeros stripped" — the entire number is silently converted to a completely different value that looks plausible but is incorrect ❌.
+`converters: :numeric` The result is not just "leading zeros stripped" — the entire number is silently converted to a completely different value¹ that looks plausible but is incorrect ❌ .
 
 `CSV.table` enables `converters: :numeric` by default without any opt-in, **triggering the bug by default**. `CSV.read` is safe by default, but triggers the same corruption when `converters: :numeric` (or `converters: :integer`) is passed explicitly.
+
+¹ : The underlying bug in the code interprets values with leading zeroes as [octal numbers](https://en.wikipedia.org/wiki/Octal) - a rather obscure number system that is not what the user could possibly expect.
 
 ```
 $ cat example4.csv
