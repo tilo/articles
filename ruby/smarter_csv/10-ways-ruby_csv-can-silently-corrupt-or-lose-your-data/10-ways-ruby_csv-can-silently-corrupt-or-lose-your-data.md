@@ -22,18 +22,20 @@ This article documents ten reproducible ways `CSV.read` (and `CSV.table`) can si
 
 | # | Ruby CSV Issue | Failure Mode | SmarterCSV fix | SmarterCSV Details |
 |---|-------|-------------|:--------------:|---------|
-| 1 | Extra columns silently dropped | Data values beyond header count are discarded — no error | by default ✅ | Default `missing_headers: :auto` auto-generates `:column_N` keys for extra values |
-| 2 | Duplicate headers — last wins | `.to_h` keeps only the last value; first silently lost | by default ✅ | Default `duplicate_header_suffix:` → `:score`, `:score2`, `:score3` |
-| 3 | Empty headers — `""` key collision | Blank headers become `""` keys (`:"" ` with symbol conversion); multiple blanks collide | by default ✅ | Default `missing_header_prefix:` → `:column_1`, `:column_2` |
-| 4 | BOM corrupts first header | `"\xEF\xBB\xBFname"` ≠ `"name"` — first column unreachable by key | by default ✅ | Automatic BOM stripping — always on, no option needed |
-| 5 | Whitespace in headers ¹ | `" Age"` ≠ `"Age"` — lookup returns nil | by default ✅ | Default `strip_whitespace: true` strips headers and values |
-| 6 | `liberal_parsing` garbles fields | Unmatched quotes produce wrong field boundaries — data looks valid | by default ✅ | `on_bad_row:` (default `:raise`) with opt-in `:skip` / `:collect` for quarantine |
-| 7 | nil vs `""` for empty fields | Unquoted empty → `nil`, quoted empty → `""` — inconsistent checks | by default ✅ | Default `remove_empty_values: true` removes both from hashes |
+| 1 | Extra columns silently dropped | Values beyond header count compete for the `nil` key — only the first survives, the rest are discarded | by default ✅ | Default `missing_headers: :auto` auto-generates `:column_N` keys |
+| 2 | Duplicate headers — first wins | `.to_h` keeps only the first value for a repeated header; later values silently lost | by default ✅ | Default `duplicate_header_suffix:` → `:score`, `:score2`, `:score3` |
+| 3 | Empty headers — `nil` key collision | Blank header cells become `nil` keys; multiple blanks collide and only the first value survives | by default ✅ | Default `missing_header_prefix:` → `:column_1`, `:column_2` |
+| 4 | `converters: :numeric` silently corrupts leading-zero values as octal ¹ | `Integer()` interprets leading zeros as octal — `"00123"` → `83` ❌ | by default ✅ | Default `convert_values_to_numeric: true` uses decimal — no octal trap; `convert_values_to_numeric: false` preserves strings exactly |
+| 5 | Whitespace in headers ² | `" Age"` ≠ `"Age"` — lookup silently returns `nil` | by default ✅ | Default `strip_whitespace: true` strips headers and values |
+| 6 | Whitespace around values | `"active  " == "active"` → `false` — leading/trailing spaces or tabs cause status/type checks to silently return wrong results | by default ✅ | Default `strip_whitespace: true` strips all values; set `false` to preserve spaces |
+| 7 | `nil` vs `""` for empty fields | Unquoted empty → `nil`, quoted empty → `""` — inconsistent empty checks | by default ✅ | Default `remove_empty_values: true` removes both; `false` normalizes both to `""` |
 | 8 | Backslash-escaped quotes (MySQL/Unix) | `\"` treated as field-closing quote — crash or garbled data | by default ✅ | Default `quote_escaping: :auto` handles both RFC 4180 and backslash escaping |
-| 9 | Missing close quote eats rest of file | One unclosed `"` swallows all subsequent rows into a single field | via option | `field_size_limit:` (opt-in) caps field bytes; `quote_boundary: :standard` (default) |
-| 10 | No encoding auto-detection | Non-UTF-8 files crash or produce mojibake | via option | `file_encoding:`, `force_utf8: true` (opt-in), `invalid_byte_sequence:` replacement |
+| 9 | TSV file read as CSV — one field per row | Default `col_sep: ","` on a tab-delimited file returns each row as a single string; all column structure lost | by default ✅ | Default `col_sep: :auto` detects the actual delimiter — no option needed |
+| 10 | No encoding auto-detection | Non-UTF-8 files either crash or silently produce mojibake | via option | `file_encoding:`, `force_utf8: true`, `invalid_byte_sequence:` |
 
-¹ The one case where `CSV.table` does better than `CSV.read`: its `header_converters: :symbol` option includes `.strip`, so whitespace is removed from headers. All other nine issues are identical between `CSV.read` and `CSV.table`.
+¹ Issue #4 can be triggered two ways: `CSV.table` enables `converters: :numeric` by default (no opt-in required), and `CSV.read` triggers the same corruption when passed `converters: :numeric` explicitly. Either way, any leading-zero string field — ZIP codes, customer IDs, product codes — is silently converted to a wrong integer.
+
+² The one case where `CSV.table` does better than `CSV.read`: its `header_converters: :symbol` option includes `.strip`, so whitespace is removed from headers (#5). Values (#6) are not stripped — `CSV.table` has the same whitespace-around-values problem. For all other issues `CSV.table` is identical to or worse than `CSV.read`.
 
 ---
 
@@ -43,11 +45,11 @@ This article documents ten reproducible ways `CSV.read` (and `CSV.table`) can si
 
 The root cause is that `CSV.read` is a **tokenizer**, not a data pipeline. It splits bytes into fields and hands them back with no normalization, no validation, and no defensive handling of real-world messiness. Every assumption about what "clean" input looks like is left to the caller.
 
-`CSV.table` fixes exactly one issue out of ten — whitespace in headers — because its `:symbol` converter happens to call `.strip`. Everything else is identical.
+`CSV.table` fixes exactly one issue out of ten — whitespace in headers — because its `:symbol` converter happens to call `.strip`. Everything else is identical or worse (issue #4 is caused by `CSV.table`'s default `converters: :numeric`).
 
-These aren't obscure edge cases. Extra columns, trailing commas, BOMs, Windows-1252 encoding, duplicate headers, and blank header cells are all common in CSV files exported from Excel, reporting tools, ERP systems, and legacy data pipelines. If your application accepts user-uploaded CSV files, you will encounter these.
+These aren't obscure edge cases. Extra columns, trailing commas, Windows-1252 encoding, duplicate headers, blank header cells, TSV-vs-CSV confusion, leading-zero identifiers, and whitespace-padded values are all common in CSV files exported from Excel, reporting tools, ERP systems, and legacy data pipelines. If your application accepts user-uploaded CSV files, you will encounter these.
 
-The defensive post-processing code required to handle all ten cases correctly — BOM stripping, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, backslash quote escaping, field size limits, encoding detection — is non-trivial to write, test, and maintain. Most applications never bother, because the failures are silent.
+The defensive post-processing code required to handle all ten cases correctly — octal-safe numeric conversion, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, backslash quote escaping, delimiter auto-detection, encoding detection — is non-trivial to write, test, and maintain. Most applications never bother, because the failures are silent.
 
 > **Ready to switch?** → [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby_csv-to-smarter_csv-in-5-minutes)
 
@@ -58,7 +60,7 @@ Read on for a detailed explanation and reproducible example for each issue.
 
 ## 1. Extra Columns Without Headers — Values Silently Discarded
 
-When a row has more fields than there are headers, `CSV.read` maps every extra field to the `nil` key. If there are multiple extra fields, they all compete for the same `nil` key — **only the last one survives**, the rest are silently discarded.
+When a row has more fields than there are headers, `CSV.read` maps every extra field to the `nil` key. If there are multiple extra fields, they all compete for the same `nil` key — **only the first one survives**, the rest are silently discarded.
 
 ```
 $ cat example1.csv
@@ -67,15 +69,14 @@ Alice , Smith,  30, VIP, Gold ,
 Bob, Jones,  25
 ```
 
-
 ```ruby
 rows = CSV.read('example1.csv', headers: true).map(&:to_h)
 rows.first
-# => {"   First Name  " => "Alice ", " Last Name " => " Smith", " Age" => "  30", nil => ""}
-#                             the values "VIP" and "Gold" are silently lost here  ^^^^^^^^^
+# => {"   First Name  " => "Alice ", " Last Name " => " Smith", " Age" => "  30", nil => " VIP"}
+#                             "Gold" and the trailing empty field are silently lost  ^^^^^^^^^^^^
 ```
 
-Alice's row has 6 fields but only 3 headers. The extra fields `"VIP"`, `"Gold"`, and `""` (trailing comma) all land on `nil` — each overwriting the last. No error, no warning.
+Alice's row has 6 fields but only 3 headers. The extra fields `" VIP"`, `" Gold"`, and `""` (trailing comma) all land on `nil` — only the first one wins. No error, no warning.
 
 This is common in real-world exports: tools frequently append audit columns, status flags, or trailing commas that don't correspond to headers.
 
@@ -86,14 +87,14 @@ This is common in real-world exports: tools frequently append audit columns, sta
 ```ruby
 rows = SmarterCSV.process('example1.csv')
 rows.first
-# => {first_name: "Alice", last_name: "Smith", age: 30, column_1: "VIP", column_2: "Gold"}
+# => {first_name: "Alice", last_name: "Smith", age: 30, column_4: "VIP", column_5: "Gold"}
 ```
 
 ---
 
 ## 2. Duplicate Header Names — First Value Silently Dropped
 
-When two columns share the same header name, `CSV::Row#to_h` keeps only the **last** value. The first is silently dropped.
+When two columns share the same header name, `CSV::Row#to_h` keeps only the **first** value. Later values are silently dropped.
 
 ```
 $ cat example2.csv
@@ -104,8 +105,8 @@ score,name,score
 ```ruby
 rows = CSV.read('example2.csv', headers: true).map(&:to_h)
 rows.first
-# => {"score" => "87", "name" => "Alice"}
-#    ^^^ first score (95) silently lost
+# => {"score" => "95", "name" => "Alice"}
+#    ^^^ second score (87) silently lost
 ```
 
 Common with reporting tool exports that repeat a column (e.g., two date columns both labeled `"Date"`).
@@ -126,11 +127,11 @@ rows.first
 
 ---
 
-## 3. Empty Header Fields — `""` Key Collision
+## 3. Empty Header Fields — `nil` Key Collision
 
-A CSV file with blank header fields (e.g., `name,,age`) gives those columns an empty string `""` as their key. Multiple blank headers all collide on `""` — same overwrite problem as issue #1.
+A CSV file with blank header fields (e.g., `name,,age`) gives those columns a `nil` key. Multiple blank headers all collide on `nil` — same overwrite problem as issue #1, and only the first value survives.
 
-> Note: this is distinct from issue #1. Issue #1 is about extra *data* fields beyond the header count, which get keyed under `nil`. Issue #3 is about blank cells *in the header row itself*, which get keyed under `""`.
+> Note: this is distinct from issue #1. Issue #1 is about extra *data* fields beyond the header count, which get keyed under `nil`. Issue #3 is about blank cells *in the header row itself*, which also get keyed under `nil`.
 
 ```
 $ cat example3.csv
@@ -141,17 +142,17 @@ Alice,foo,bar,30
 ```ruby
 rows = CSV.read('example3.csv', headers: true).map(&:to_h)
 rows.first
-# => {"name" => "Alice", "" => "bar", "age" => "30"}
-#    ^^^ "foo" silently lost — both blank headers wrote to "" key
+# => {"name" => "Alice", nil => "foo", "age" => "30"}
+#    ^^^ "bar" silently lost — both blank headers map to nil, first value wins
 ```
 
-`CSV.table` converts headers to symbols — blank headers become `:"" ` — same collision, different key:
+`CSV.table` has the same `nil` key collision:
 
 ```ruby
 rows = CSV.table('example3.csv').map(&:to_h)
 rows.first
-# => {name: "Alice", :"" => "bar", age: 30}
-#    ^^^ "foo" still silently lost
+# => {name: "Alice", nil => "foo", age: 30}
+#    ^^^ "bar" still silently lost
 ```
 
 **SmarterCSV:** `missing_header_prefix:` (default `"column_"`) auto-generates names for blank headers: `:column_1`, `:column_2`, etc. No collision, no data loss.
@@ -164,42 +165,60 @@ rows.first
 
 ---
 
-## 4. BOM Corrupts the First Header
+## 4. `converters: :numeric` Silently Corrupts Leading-Zero Values as Octal
 
-Files saved by Excel on Windows often include a UTF-8 BOM (`\xEF\xBB\xBF`) at the start. `CSV.read` doesn't strip it, so the BOM is silently prepended to the first header name.
+`converters: :numeric` calls Ruby's `Integer()` on every field that looks like a number. Ruby's `Integer()` follows C literal conventions: **a leading zero means octal**. The result is not just "leading zeros stripped" — the entire number is silently converted to a completely different value that looks plausible but is incorrect ❌.
+
+`CSV.table` enables `converters: :numeric` by default without any opt-in, **triggering the bug by default**. `CSV.read` is safe by default, but triggers the same corruption when `converters: :numeric` (or `converters: :integer`) is passed explicitly.
 
 ```
 $ cat example4.csv
-name,age
-Alice,30
+customer_id,zip_code,amount
+00123,01234,99.50
+00456,90210,9.99
 ```
 
-```
-$ hexdump -C example4.csv
-00000000  ef bb bf 6e 61 6d 65 2c  61 67 65 0a 41 6c 69 63  |...name,age.Alic|
-00000010  65 2c 33 30 0a                                     |e,30.|
+**With Ruby CSV:**
+
+```ruby
+# CSV.table — converters: :numeric on by default, no opt-in needed
+rows = CSV.table('example4.csv').map(&:to_h)
+rows.first
+# => {customer_id: 83, zip_code: 668, amount: 99.5}
+#    ^^^ "00123" → 83  (octal 0123 = decimal 83)
+#    ^^^ "01234" → 668 (octal 1234 = decimal 668)
+
+# CSV.read with explicit converters: :numeric — same result
+rows = CSV.read('example4.csv', headers: true, converters: :numeric).map(&:to_h)
+rows.first
+# => {"customer_id" => 83, "zip_code" => 668, "amount" => 99.5}
 ```
 
-The `ef bb bf` at offset 0 is the UTF-8 BOM — invisible in `cat` output but silently prepended to the first header by `CSV.read`.
+`"00123"` becomes `83`. `"01234"` becomes `668`. ZIP codes, customer IDs, order numbers, product codes — any field with a leading zero becomes a completely wrong integer. No exception, no warning. The resulting values look plausible and pass all type validations.
+
+`CSV.read` without converters is safe — strings are returned as-is:
 
 ```ruby
 rows = CSV.read('example4.csv', headers: true).map(&:to_h)
-rows.first.keys.first   # => "\xEF\xBB\xBFname"  ← not "name"
-
-rows.first['name']      # => nil   ← first column unreachable
+rows.first
+# => {"customer_id" => "00123", "zip_code" => "01234", "amount" => "99.50"}
 ```
 
-The data is there but every lookup on the first column silently returns `nil`. This is a particularly nasty bug because the BOM is invisible in most terminals and editors — the output looks perfectly correct.
-
-**`CSV.table` has the same problem.**
-
-**SmarterCSV:** automatically detects and strips BOMs at the start of the file. Always on, no option needed.
+**SmarterCSV:**
 
 ```ruby
+# Default (convert_values_to_numeric: true) — decimal conversion, no octal trap
 rows = SmarterCSV.process('example4.csv')
-rows.first.keys.first   # => :name  ← BOM stripped automatically
-rows.first[:name]       # => "Alice"
+rows.first
+# => {customer_id: 123, zip_code: 1234, amount: 99.5}
+
+# convert_values_to_numeric: false — preserves strings exactly, including leading zeros
+rows = SmarterCSV.process('example4.csv', convert_values_to_numeric: false)
+rows.first
+# => {customer_id: "00123", zip_code: "01234", amount: "99.50"}
 ```
+
+SmarterCSV's default `convert_values_to_numeric: true` uses `to_i` / `to_f`, which always treats strings as decimal — no octal interpretation. Use `convert_values_to_numeric: false` when leading zeros must be preserved (ZIP codes, IDs, product codes).
 
 ---
 
@@ -222,7 +241,7 @@ rows.first['name']   # => nil  ← silent miss; key is " name ", not "name"
 rows.first['age']    # => nil
 ```
 
-**`CSV.table` mitigates this:** the `:symbol` header converter includes `.strip`, so whitespace is removed. This is the one issue where `CSV.table` behaves better than `CSV.read`.
+**`CSV.table` mitigates this:** ² the `:symbol` header converter includes `.strip`, so whitespace is removed from headers. This is the one issue where `CSV.table` behaves better than `CSV.read`.
 
 **SmarterCSV:**
 
@@ -236,71 +255,48 @@ The default setting `strip_whitespace: true` strips leading/trailing whitespace 
 
 ---
 
-## 6. `liberal_parsing: true` Garbles Field Values
+## 6. Whitespace Around Values — Silent Comparison Failure
 
-`CSV.read` raises `MalformedCSVError` when it encounters an unmatched quote. `liberal_parsing: true` suppresses the error and returns a row anyway — but with wrong field boundaries. The key danger: **without `liberal_parsing` you at least know something is wrong**; with it, corrupted data is silently returned as valid.
+`CSV.read` returns field values exactly as they appear in the file — leading spaces, trailing spaces, and tab characters all preserved. Exporters from fixed-width database systems (Oracle `CHAR` columns, COBOL-era systems) routinely pad string fields to a fixed width; other tools leave accidental leading spaces. The values look correct when printed, but equality checks silently return `false`.
+
+This pairs with Example 5 (whitespace in headers): Ruby CSV strips neither headers nor values by default.
 
 ```
 $ cat example6.csv
-name,note,score
-Alice,"unclosed quote,99
-Bob,normal,87
+name,status,city
+Alice,active  ,New York    ← trailing spaces after 'active'
+Bob,inactive,Chicago
+Carol, active,Boston       ← leading space before 'active'
 ```
 
 ```ruby
-# Without liberal_parsing: you know something is wrong
-CSV.read('example6.csv', headers: true)
-# => CSV::MalformedCSVError: Unclosed quoted field on line 2
+rows = CSV.read('example6.csv', headers: true).map(&:to_h)
 
-# With liberal_parsing: silent corruption
-rows = CSV.read('example6.csv', headers: true, liberal_parsing: true).map(&:to_h)
-rows.length     # => 1  (not 2 — Bob's row is gone)
-rows[0]
-# => {"name" => "Alice", "note" => "unclosed quote,99\nBob,normal,87", "score" => nil}
-#    Alice's note field swallowed the rest of the file. Bob vanished. No error raised.
+rows[0]['status']  # => "active  "
+rows[2]['status']  # => " active"
+
+rows.select { |r| r['status'] == 'active' }
+# => []  ← Alice and Carol are not found. No error raised.
 ```
 
-The garbled row passes validations, gets inserted into the database, and surfaces as a data quality bug later. You don't know what you don't know.
+The values look fine in logs and `puts` output. The bug only surfaces when the comparison silently returns the wrong result.
 
-**`CSV.table` has the same problem.**
+**Workaround:** pass `strip: true` to `CSV.read`. This correctly strips spaces and tab characters. Note it also strips intentional leading/trailing spaces from any field — including quoted fields where spaces may be meaningful.
 
-**SmarterCSV:** `on_bad_row:` (default `:raise`) with opt-in `:skip` or `:collect` for explicit quarantine. Bad rows are isolated — not silently mangled and returned as good data.
+**`CSV.table` has the same problem** — its `:symbol` converter strips header names but does not touch field values.
+
+**SmarterCSV:**
 
 ```ruby
-good_rows = SmarterCSV.process('example6.csv', on_bad_row: :collect)
-SmarterCSV.errors
-# => {
-#     :bad_row_count => 1,
-#          :bad_rows => [
-#         {
-#                 :csv_line_number => 2,
-#                :file_line_number => 2,
-#             :file_lines_consumed => 2,
-#                     :error_class => SmarterCSV::MalformedCSV,
-#                   :error_message => "Unclosed quoted field detected in multiline data",
-#                :raw_logical_line => "Alice,\"unclosed quote,99\nBob,normal,87\n"
-#         }
-#     ]
-# }
+rows = SmarterCSV.process('example6.csv')
+
+rows[0][:status]  # => "active"
+rows[2][:status]  # => "active"
+
+rows.select { |r| r[:status] == 'active' }.length  # => 2
 ```
 
-> ⚠️ **Fibers:** `SmarterCSV.errors` relies on `Thread.current`, which is shared across all
-> fibers in the same thread. If you process CSV in fibers (`Async`, `Falcon`, manual
-> `Fiber` scheduling), use `SmarterCSV::Reader` directly — its errors are scoped to the
-> instance and are always correct regardless of fiber context.
-
-Or use `SmarterCSV::Reader` directly when you also need access to headers or other reader state:
-
-```ruby
-reader = SmarterCSV::Reader.new('example6.csv', on_bad_row: :collect)
-good_rows = reader.process
-reader.errors   # same structure as above
-```
-
-* `on_bad_row: :raise` (default) fails fast.
-* `on_bad_row: :skip` discards bad rows silently — count available via `SmarterCSV.errors[:bad_row_count]`.
-* `on_bad_row: :collect` quarantines them — available via `SmarterCSV.errors` or `reader.errors`.
-* `on_bad_row: ->(rec) { ... }` calls your lambda per bad row.
+`strip_whitespace: true` (default) strips all leading and trailing whitespace (spaces and tabs) from values. Set `strip_whitespace: false` to preserve spaces when needed.
 
 ---
 
@@ -332,7 +328,7 @@ Both rows have no city. But your code sees two different things. Any check using
 
 **`CSV.table` has the same problem.**
 
-**SmarterCSV:** `remove_empty_values: true` (default) removes both from the hash. With `remove_empty_values: false`, both become `nil`. Consistent either way.
+**SmarterCSV:** `remove_empty_values: true` (default) removes both from the hash. With `remove_empty_values: false`, both are normalized to `""`. Consistent either way.
 
 ```ruby
 # remove_empty_values: true (default) — both empty cities are dropped from the hash
@@ -340,10 +336,10 @@ rows = SmarterCSV.process('example7.csv')
 rows[0]   # => {name: "Alice"}
 rows[1]   # => {name: "Bob"}
 
-# remove_empty_values: false — both normalized to nil
+# remove_empty_values: false — both normalized to ""
 rows = SmarterCSV.process('example7.csv', remove_empty_values: false)
-rows[0]   # => {name: "Alice", city: nil}
-rows[1]   # => {name: "Bob",   city: nil}
+rows[0]   # => {name: "Alice", city: ""}
+rows[1]   # => {name: "Bob",   city: ""}
 ```
 
 ---
@@ -390,67 +386,41 @@ rows[1]   # => {name: "Bob",   note: "Normal note"}
 
 ---
 
-## 9. Missing Closing Quote Consumes the Rest of the File
+## 9. TSV File Read as CSV — One Field Per Row
 
-A single unclosed `"` anywhere in the file causes the parser to enter quoted-field mode and treat everything that follows — newlines included — as part of one field. **All remaining rows are swallowed into a single field value.**
+`CSV.read` defaults to `col_sep: ","`. When given a tab-delimited file (TSV), it finds no commas and treats each entire row as a single field. The header row becomes one giant key; each data row becomes one giant value. All column structure is silently lost — no error, no warning, and `rows.length` looks correct.
 
 ```
 $ cat example9.csv
-name,age
-"Alice,30
-Bob,25
-Carol,40
+name	city	score
+Alice	New York	95
+Bob	Chicago	87
 ```
 
 ```ruby
-rows = CSV.read('example9.csv', headers: true)
-rows.length         # => 1  (not 3)
-rows.first['name']  # => "Alice,30\nBob,25\nCarol,40"
-#                         ^^^ entire remainder of file in one field
+rows = CSV.read('example9.csv', headers: true).map(&:to_h)
+
+rows.length           # => 2  (looks right — but...)
+rows.first.keys       # => ["name\tcity\tscore"]  ← entire header is one key
+rows.first['name']    # => nil  ← column unreachable
+rows.first.values     # => ["Alice\tNew York\t95"]  ← entire row is one value
 ```
 
-On a large file this is an OOM risk: the parser accumulates an ever-growing string until EOF or memory exhaustion. There is no field size limit, no timeout, and no error until the file ends — by which point you've read the whole file into RAM.
+This is common when a pipeline switches file formats without updating the parser, or when a tool exports TSV instead of CSV without changing the extension.
 
 **`CSV.table` has the same problem.**
 
-**SmarterCSV:** `field_size_limit: N` raises `SmarterCSV::FieldSizeLimitExceeded` as soon as any field or accumulating multiline buffer exceeds N bytes — the parse stops immediately. Additionally, `quote_boundary: :standard` (the default since 1.16.0) means mid-field quotes don't toggle quoted mode at all, reducing the attack surface.
+**SmarterCSV:**
 
 ```ruby
-good_rows = SmarterCSV.process('example9.csv',
-  field_size_limit: 10_000,
-  on_bad_row: :collect,
-)
-SmarterCSV.errors
-# => {
-#     :bad_row_count => 1,
-#          :bad_rows => [
-#         {
-#                 :csv_line_number => 2,
-#                :file_line_number => 2,
-#             :file_lines_consumed => 3,
-#                     :error_class => SmarterCSV::MalformedCSV,
-#                   :error_message => "Unclosed quoted field detected in multiline data",
-#                :raw_logical_line => "\"Alice,30\nBob,25\nCarol,40\n"
-#         }
-#     ]
-# }
+rows = SmarterCSV.process('example9.csv')
+# col_sep: :auto detects the tab separator automatically
+
+rows.first
+# => {name: "Alice", city: "New York", score: 95}
 ```
 
-> ⚠️ **Fibers:** `SmarterCSV.errors` relies on `Thread.current`, which is shared across all
-> fibers in the same thread. If you process CSV in fibers (`Async`, `Falcon`, manual
-> `Fiber` scheduling), use `SmarterCSV::Reader` directly — its errors are scoped to the
-> instance and are always correct regardless of fiber context.
-
-Or use `SmarterCSV::Reader` directly when you also need access to headers or other reader state:
-
-```ruby
-reader = SmarterCSV::Reader.new('example9.csv',
-  field_size_limit: 10_000,
-  on_bad_row: :collect,
-)
-good_rows = reader.process
-reader.errors   # same structure as above
-```
+`col_sep: :auto` (default) samples the file and detects the actual delimiter. No option required.
 
 ---
 
@@ -510,9 +480,9 @@ rows = CSV.read('data.csv', headers: true).map(&:to_h)
 rows = SmarterCSV.process('data.csv')
 ```
 
-SmarterCSV handles eight of the ten cases out of the box — BOM stripping, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, and backslash quote escaping.
+SmarterCSV handles nine of the ten cases out of the box — octal-safe numeric conversion, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, backslash quote escaping, and delimiter auto-detection.
 
-The remaining two (field size limits and encoding control) require explicit opt-in options, but the building blocks are there. No boilerplate, no post-processing pipeline, no silent data loss.
+The remaining one (encoding control) requires explicit opt-in options, but the building blocks are there. No boilerplate, no post-processing pipeline, no silent data loss.
 
 Give SmarterCSV a try and let us know how it performs in your use case — feedback and bug reports are welcome in the [GitHub Discussions](https://github.com/tilo/smarter_csv/discussions) or [Issues](https://github.com/tilo/smarter_csv/issues).
 
