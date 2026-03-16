@@ -79,7 +79,9 @@ rows.first
 #       "   First Name  " => "Alice ",
 #           " Last Name " => " Smith",
 #                 " Age" => "  30",
-#                    nil => " VIP"    ← "Gold" and the trailing empty field are silently lost
+#                    nil => " VIP"
+#                    ^^^^^^^^^^^^^
+#  "Gold" and the trailing empty field are silently lost
 # }
 ```
 
@@ -100,6 +102,8 @@ rows.first
 #            age: 30,
 #       column_4: "VIP",
 #       column_5: "Gold"
+#       ^^^^^^^^^^^^^^^^
+#  extra data columns are handled, no data is lost
 # }
 ```
 
