@@ -513,6 +513,6 @@ rows = SmarterCSV.process('data.csv')
 
 SmarterCSV handles all ten cases with sensible defaults — BOM stripping, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, backslash quote escaping, field size limits, and encoding control. No boilerplate, no post-processing pipeline, no silent data loss.
 
-**GitHub:** [github.com/tilo/smarter_csv](https://github.com/tilo/smarter_csv)
-**Docs:** [Full documentation](https://github.com/tilo/smarter_csv/blob/master/docs/_introduction.md)
-**RubyGems:** [rubygems.org/gems/smarter_csv](https://rubygems.org/gems/smarter_csv)
+* **GitHub:** [github.com/tilo/smarter_csv](https://github.com/tilo/smarter_csv)
+* **Docs:** [Full documentation](https://github.com/tilo/smarter_csv/blob/master/docs/_introduction.md)
+* **RubyGems:** [rubygems.org/gems/smarter_csv](https://rubygems.org/gems/smarter_csv)

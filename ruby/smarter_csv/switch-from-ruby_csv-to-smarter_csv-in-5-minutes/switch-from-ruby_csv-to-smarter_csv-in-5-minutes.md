@@ -2,7 +2,7 @@
 title: "Switch from Ruby CSV to SmarterCSV in 5 Minutes"
 published: false
 description: "SmarterCSV returns Rails-ready hashes with symbol keys, automatic numeric conversion, and whitespace stripping — often just a single line change from Ruby's built-in CSV library, and up to 129× faster."
-tags: ruby, csv, rails, tutorial
+tags: ruby, csv, rails, tutorial, programming
 cover_image:
 ---
 
@@ -478,6 +478,6 @@ The rest — batch processing, bad row handling, value converters, column select
 gem 'smarter_csv'
 ```
 
-**GitHub:** [github.com/tilo/smarter_csv](https://github.com/tilo/smarter_csv)
-**Docs:** [Full documentation](https://github.com/tilo/smarter_csv/blob/master/docs/_introduction.md)
-**RubyGems:** [rubygems.org/gems/smarter_csv](https://rubygems.org/gems/smarter_csv)
+* **GitHub:** [github.com/tilo/smarter_csv](https://github.com/tilo/smarter_csv)
+* **Docs:** [Full documentation](https://github.com/tilo/smarter_csv/blob/master/docs/_introduction.md)
+* **RubyGems:** [rubygems.org/gems/smarter_csv](https://rubygems.org/gems/smarter_csv)
