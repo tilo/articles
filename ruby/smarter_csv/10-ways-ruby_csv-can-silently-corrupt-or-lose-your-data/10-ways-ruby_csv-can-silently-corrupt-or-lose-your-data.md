@@ -6,6 +6,7 @@ tags: 'ruby, csv, rails, programming'
 cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data/images/10-ways-ruby_csv-can-corrupt-data.png'
 slug: 10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data
 id: 3356453
+date: '2026-03-16T17:03:50Z'
 ---
 
 When having to parse CSV files, many developers go straight to the Ruby `CSV` library — but it comes at the cost of writing boilerplate post-processing, and there are some dangerous pitfalls you might not be aware of.
