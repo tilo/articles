@@ -6,6 +6,7 @@ tags: 'ruby, csv, rails, programming'
 cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/switch-from-ruby_csv-to-smarter_csv-in-5-minutes/images/switch-to-smarter_csv.png'
 slug: switch-from-ruby_csv-to-smarter_csv-in-5-minutes
 id: 3356502
+date: '2026-03-16T17:06:19Z'
 ---
 
 > **Why switch?** → [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data)
