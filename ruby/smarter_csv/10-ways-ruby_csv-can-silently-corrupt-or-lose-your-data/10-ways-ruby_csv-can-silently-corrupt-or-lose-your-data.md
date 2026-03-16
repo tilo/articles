@@ -4,9 +4,8 @@ published: false
 description: "Ruby's built-in CSV library has ten failure modes that produce no exception, no warning, and no indication anything went wrong. Your import runs, your tests pass, and your data is quietly wrong."
 tags: ruby, csv, rails, programming
 cover_image:
+slug: 10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data
 ---
-
-# 10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data
 
 When having to parse CSV files, many developers go straight to the Ruby `CSV` library — but it comes at the cost of writing boilerplate post-processing, and there are some dangerous pitfalls you might not be aware of.
 
@@ -49,7 +48,7 @@ These aren't obscure edge cases. Extra columns, trailing commas, BOMs, Windows-1
 
 The defensive post-processing code required to handle all ten cases correctly — BOM stripping, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, backslash quote escaping, field size limits, encoding detection — is non-trivial to write, test, and maintain. Most applications never bother, because the failures are silent.
 
-> **Ready to switch?** → [Switch from Ruby CSV to SmarterCSV in 5 Minutes](./switch_from_ruby_csv_to_smarter_csv_in_5_minutes.md)
+> **Ready to switch?** → [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby_csv-to-smarter_csv-in-5-minutes)
 
 ---
 

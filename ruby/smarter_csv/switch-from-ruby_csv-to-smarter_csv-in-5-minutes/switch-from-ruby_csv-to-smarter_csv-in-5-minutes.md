@@ -4,9 +4,10 @@ published: false
 description: "SmarterCSV returns Rails-ready hashes with symbol keys, automatic numeric conversion, and whitespace stripping — often just a single line change from Ruby's built-in CSV library, and up to 129× faster."
 tags: ruby, csv, rails, tutorial, programming
 cover_image:
+slug: switch-from-ruby_csv-to-smarter_csv-in-5-minutes
 ---
 
-# Switch from Ruby CSV to SmarterCSV in 5 Minutes
+> **Why switch?** → [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data)
 
 In this article we'll explore how easy it is to switch from Ruby CSV to SmarterCSV — often just a single line change.
 
