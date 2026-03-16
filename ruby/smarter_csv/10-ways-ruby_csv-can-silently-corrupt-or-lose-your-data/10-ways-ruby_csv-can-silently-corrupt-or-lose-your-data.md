@@ -32,7 +32,7 @@ This article documents ten reproducible ways `CSV.read` (and `CSV.table`) can si
 | 7 | `nil` vs `""` for empty fields | Unquoted empty → `nil`, quoted empty → `""` — inconsistent empty checks | by default ✅ | Default `remove_empty_values: true` removes both; `false` normalizes both to `""` |
 | 8 | Backslash-escaped quotes (MySQL/Unix) | `\"` treated as field-closing quote — crash or garbled data | by default ✅ | Default `quote_escaping: :auto` handles both RFC 4180 and backslash escaping |
 | 9 | TSV file read as CSV — one field per row | Default `col_sep: ","` on a tab-delimited file returns each row as a single string; all column structure lost | by default ✅ | Default `col_sep: :auto` detects the actual delimiter — no option needed |
-| 10 | No encoding auto-detection | Non-UTF-8 files either crash or silently produce mojibake | via option | `file_encoding:`, `force_utf8: true`, `invalid_byte_sequence:` |
+| 10 | No encoding auto-detection | Non-UTF-8 files either crash or silently produce mojibake | via option | `file_encoding:`, `force_utf8: true`, `invalid_byte_sequence: ''` |
 
 ¹ Issue #4 can be triggered two ways: `CSV.table` enables `converters: :numeric` by default (no opt-in required), and `CSV.read` triggers the same corruption when passed `converters: :numeric` explicitly. Either way, any leading-zero string field — ZIP codes, customer IDs, product codes — is silently converted to a wrong integer.
 
@@ -461,7 +461,7 @@ The mojibake string passes `.valid_encoding?`, passes database validations, gets
 
 **`CSV.table` has the same problem.**
 
-**SmarterCSV:** `file_encoding:` accepts Ruby's `'external:internal'` transcoding notation; `force_utf8: true` transcodes to UTF-8 automatically; `invalid_byte_sequence:` controls the replacement character for bytes that can't be transcoded.
+**SmarterCSV:** `file_encoding:` accepts Ruby's `'external:internal'` transcoding notation; `force_utf8: true` transcodes to UTF-8 automatically; `invalid_byte_sequence: ''` controls the replacement character for bytes that can't be transcoded, e.g. `''`.
 
 ```ruby
 rows = SmarterCSV.process('example10.csv',
