@@ -1,10 +1,11 @@
 ---
-title: "Switch from Ruby CSV to SmarterCSV in 5 Minutes"
+title: Switch from Ruby CSV to SmarterCSV in 5 Minutes
 published: false
-description: "SmarterCSV returns Rails-ready hashes with symbol keys, automatic numeric conversion, and whitespace stripping — often just a single line change from Ruby's built-in CSV library, and up to 129× faster."
-tags: ruby, csv, rails, tutorial
-cover_image: https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/switch-from-ruby_csv-to-smarter_csv-in-5-minutes/images/switch-to-smarter_csv.png
+description: 'SmarterCSV returns Rails-ready hashes with symbol keys, automatic numeric conversion, and whitespace stripping — often just a single line change from Ruby''s built-in CSV library, and up to 129× faster.'
+tags: 'ruby, csv, rails, tutorial'
+cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/switch-from-ruby_csv-to-smarter_csv-in-5-minutes/images/switch-to-smarter_csv.png'
 slug: switch-from-ruby_csv-to-smarter_csv-in-5-minutes
+id: 3356502
 ---
 
 
