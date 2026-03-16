@@ -5,11 +5,7 @@ description: 'SmarterCSV 1.16 brings major performance gains (up to 129× faster
 tags: 'ruby, csv, performance, rails'
 cover_image: null
 slug: smarter_csv-1.16-released
-<<<<<<< HEAD
 id: 3357262
-=======
-id: 923080
->>>>>>> 7034dfe (update)
 ---
 
 SmarterCSV 1.16 is out — it brings major performance gains, a new bad-row quarantine system, a significantly expanded API, and 696 new tests.
