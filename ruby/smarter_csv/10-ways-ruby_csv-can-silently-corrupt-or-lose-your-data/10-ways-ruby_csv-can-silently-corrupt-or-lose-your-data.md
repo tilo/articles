@@ -54,7 +54,7 @@ The defensive post-processing code required to handle all ten cases correctly �
 
 ³ These aren't rounding errors or truncations — they are completely different numbers. [Octal](https://en.wikipedia.org/wiki/Octal) is a base-8 number system from the early days of computing, still used in low-level Unix file permissions and C integer literals. It has no place in CSV data. No spreadsheet, ERP system, or database exports ZIP codes or customer IDs in octal — but Ruby CSV silently assumes that's exactly what a leading zero means.
 
-> **Ready to switch?** → [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby_csv-to-smarter_csv-in-5-minutes)
+> **Ready to switch?** → [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)
 
 Read on for a detailed explanation and reproducible example for each issue.
 
