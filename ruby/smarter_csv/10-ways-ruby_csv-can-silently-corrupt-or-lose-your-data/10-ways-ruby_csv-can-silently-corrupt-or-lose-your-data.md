@@ -75,8 +75,12 @@ Bob, Jones,  25
 ```ruby
 rows = CSV.read('example1.csv', headers: true).map(&:to_h)
 rows.first
-# => {"   First Name  " => "Alice ", " Last Name " => " Smith", " Age" => "  30", nil => " VIP"}
-#                             "Gold" and the trailing empty field are silently lost  ^^^^^^^^^^^^
+# => {
+#       "   First Name  " => "Alice ",
+#           " Last Name " => " Smith",
+#                 " Age" => "  30",
+#                    nil => " VIP"    ← "Gold" and the trailing empty field are silently lost
+# }
 ```
 
 Alice's row has 6 fields but only 3 headers. The extra fields `" VIP"`, `" Gold"`, and `""` (trailing comma) all land on `nil` — only the first one wins. No error, no warning.
@@ -90,7 +94,13 @@ This is common in real-world exports: tools frequently append audit columns, sta
 ```ruby
 rows = SmarterCSV.process('example1.csv')
 rows.first
-# => {first_name: "Alice", last_name: "Smith", age: 30, column_4: "VIP", column_5: "Gold"}
+# => {
+#     first_name: "Alice",
+#      last_name: "Smith",
+#            age: 30,
+#       column_4: "VIP",
+#       column_5: "Gold"
+# }
 ```
 
 ---
