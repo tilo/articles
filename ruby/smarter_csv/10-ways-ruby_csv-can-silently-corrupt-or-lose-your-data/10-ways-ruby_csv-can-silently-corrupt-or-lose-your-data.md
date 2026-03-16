@@ -1,10 +1,11 @@
 ---
-title: "10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data"
+title: 10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data
 published: false
-description: "Ruby's built-in CSV library has ten failure modes that produce no exception, no warning, and no indication anything went wrong. Your import runs, your tests pass, and your data is quietly wrong."
-tags: ruby, csv, rails, programming
-cover_image:
+description: 'Ruby''s built-in CSV library has ten failure modes that produce no exception, no warning, and no indication anything went wrong. Your import runs, your tests pass, and your data is quietly wrong.'
+tags: 'ruby, csv, rails, programming'
+cover_image: null
 slug: 10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data
+id: 3356453
 ---
 
 When having to parse CSV files, many developers go straight to the Ruby `CSV` library — but it comes at the cost of writing boilerplate post-processing, and there are some dangerous pitfalls you might not be aware of.
