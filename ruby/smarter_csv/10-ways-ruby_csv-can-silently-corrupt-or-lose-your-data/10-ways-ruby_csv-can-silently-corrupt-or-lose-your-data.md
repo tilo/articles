@@ -50,8 +50,6 @@ The defensive post-processing code required to handle all ten cases correctly â€
 
 > **Ready to switch?** â†’ [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby_csv-to-smarter_csv-in-5-minutes)
 
----
-
 Read on for a detailed explanation and reproducible example for each issue.
 
 ---
@@ -112,7 +110,7 @@ Common with reporting tool exports that repeat a column (e.g., two date columns 
 
 **`CSV.table` has the same problem.**
 
-**SmarterCSV:** `disambiguates duplicate headers by appending a number directly: `:score`, `:score2`, `:score3`.
+**SmarterCSV:** disambiguates duplicate headers by appending a number directly: `:score`, `:score2`, `:score3`.
 
 ```ruby
 rows = SmarterCSV.process('example2.csv')
@@ -122,7 +120,7 @@ rows.first
 
 * The default `duplicate_header_suffix: ""` disambiguates by appending a counter: `:score`, `:score2`, `:score3`.
 * Use `duplicate_header_suffix: '_'` to get `:score_2`, `:score_3`.
-* Set `duplicate_header_suffic: nil` to raise `DuplicateHeaders` instead.
+* Set `duplicate_header_suffix: nil` to raise `DuplicateHeaders` instead.
 
 ---
 
