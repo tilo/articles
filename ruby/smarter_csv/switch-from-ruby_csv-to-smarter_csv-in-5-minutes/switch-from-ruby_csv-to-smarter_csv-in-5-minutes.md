@@ -7,6 +7,7 @@ cover_image: https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_c
 slug: switch-from-ruby_csv-to-smarter_csv-in-5-minutes
 ---
 
+
 > **Why switch?** → [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data)
 
 In this article we'll explore how easy it is to switch from Ruby CSV to SmarterCSV — often just a single line change.
