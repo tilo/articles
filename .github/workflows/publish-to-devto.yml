@@ -20,3 +20,4 @@ jobs:
           devto_key: ${{ secrets.DEVTO_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           conventional_commits: false
+          publish_all: true
