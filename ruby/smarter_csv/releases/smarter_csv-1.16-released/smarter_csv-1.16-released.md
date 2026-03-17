@@ -37,7 +37,7 @@ The headline number that usually surprises people: SmarterCSV 1.16 returns **ful
 
 Measured on 19 benchmark files, Apple M1 Pro, Ruby 3.4.7. The 129× figure is on a 117-column import file where `CSV.table`'s overhead compounds with column count.
 
-¹ The comparison against `CSV.table` is more apples-to-apples: both produce symbol-keyed hashes with numeric conversion. That's what you actually need in a Rails app — but `CSV.table` has bugs, including silently mis-handling numbers with leading-zero. See [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02).
+¹ The comparison against `CSV.table` is more apples-to-apples: both produce symbol-keyed hashes with numeric conversion. That's what you actually need in a Rails app — but `CSV.table` and `CSV.read` have bugs, including silently mis-handling numbers with leading-zeroes. See [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02).
 
 ### What drove these gains
 
