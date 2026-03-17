@@ -16,9 +16,13 @@ SmarterCSV 1.16 is out — it brings major performance gains, new bad-row quaran
 gem 'smarter_csv', '~> 1.16'
 ```
 
+> **New to SmarterCSV?** Start here first:
+> - [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)
+> - [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)
+
 ---
 
-## Performance: Faster Than CSV.read
+## Performance: 1.8×–8.6× Faster Than CSV.read
 
 The headline number that usually surprises people: SmarterCSV 1.16 returns **fully processed symbol-keyed hashes with numeric conversion** — and still beats `CSV.read` (which returns raw string arrays with no post-processing at all):
 
@@ -35,19 +39,11 @@ The `CSV.table` comparison is the apples-to-apples one: both produce symbol-keye
 
 ### What drove these gains
 
-**C extension (accelerated path):**
-- `ParseContext` architecture — all per-file parse options wrapped in a GC-managed `TypedData` object, built once after headers load. Eliminates ~10 `rb_hash_aref` calls per row that previously re-read the options hash on every single row.
-- `getbyte` + `byteslice` everywhere — character lookups in the inner loop replaced with `getbyte` (returns Integer directly, ~5–10 ns, zero allocation vs ~30–50 ns for a one-char String).
-- `memchr` skip-ahead — jumps to the next quote character inside quoted fields instead of advancing byte-by-byte. This is the biggest win on long-field files (up to 2.4×).
-- Column-filter bitmap — `headers: { only: [...] }` uses a precomputed packed bitmap; excluded columns are skipped before any string allocation or hash insertion.
-
-**Ruby path:**
-- Direct hash construction — `parse_line_to_hash_ruby` builds the result hash directly from `String#split` for unquoted lines. Eliminates the intermediate `Array` from `parse_csv_line_ruby` and a second full-row iteration.
-- Hot-path option caching — `@quote_char`, `@col_sep`, `@field_size_limit`, and seven other options precomputed as instance variables after headers load.
+The C extension was overhauled to minimize allocations and per-row overhead in the inner parsing loop. The pure-Ruby path was also improved to build result hashes more directly, with key options cached upfront instead of re-read on every row.
 
 ### Column selection speedup
 
-When using `headers: { only: [...] }` to keep a subset of columns, excluded columns are skipped entirely in the C hot path:
+When using `headers: { only: [...] }` to keep a subset of columns, excluded columns are skipped entirely in the C hot path. This is most significant when the columns you need are towards the front of the file. If the columns you want are near the end, the parser still has to read through all the preceding columns before it can skip anything — so the gains will be smaller.
 
 | Columns kept | Speedup vs no selection |
 |---|---|
@@ -299,8 +295,6 @@ These options still work but emit a warning — update when convenient:
 
 | Old | New |
 |-----|-----|
-| `only_headers:` | `headers: { only: [...] }` |
-| `except_headers:` | `headers: { except: [...] }` |
 | `remove_values_matching:` | `nil_values_matching:` |
 | `strict: true` | `missing_headers: :raise` |
 | `strict: false` | `missing_headers: :auto` |
