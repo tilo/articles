@@ -30,13 +30,13 @@ The headline number that usually surprises people: SmarterCSV 1.16 returns **ful
 | Comparison | Speedup |
 |---|---|
 | vs `CSV.read` (raw arrays) | **1.8×–8.6× faster** |
-| vs `CSV.table` (symbol keys + numeric conversion — the fair comparison) | **7×–129× faster** |
+| vs `CSV.table` (symbol keys + numeric conversion)¹ | **7×–129× faster** |
 | vs SmarterCSV 1.15.2 | **up to 2.4× faster** |
 | vs SmarterCSV 1.14.4 | **9×–65× faster** |
 
 Measured on 19 benchmark files, Apple M1 Pro, Ruby 3.4.7. The 129× figure is on a 117-column import file where `CSV.table`'s overhead compounds with column count.
 
-The `CSV.table` comparison is the apples-to-apples one: both produce symbol-keyed hashes with numeric conversion. That's what you actually need in a Rails app.
+¹ The `CSV.table` comparison is the apples-to-apples one: both produce symbol-keyed hashes with numeric conversion. That's what you actually need in a Rails app.
 
 ### What drove these gains
 
