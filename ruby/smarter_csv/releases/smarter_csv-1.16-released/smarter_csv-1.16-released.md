@@ -15,6 +15,7 @@ SmarterCSV 1.16 is out — it brings major performance gains, new bad-row quaran
 ```ruby
 gem 'smarter_csv', '~> 1.16'
 ```
+---
 
 > **New to SmarterCSV?** Start here first:
 > - [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)
