@@ -8,19 +8,17 @@ slug: smarter_csv-1.16-released
 id: 3357262
 ---
 
-> Fair warning — this one's a long read. But if you've ever had a silent data import bug ruin your day, it's worth it.
+> Fair warning — this one's a long read. But if you've ever had silent data import bugs ruin your day, it's worth it.
+>
+> **New to SmarterCSV?** Start here first:
+> - [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)
+> - [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)
 
 SmarterCSV 1.16 is out — it brings major performance gains, new bad-row quarantine system, instrumentation hooks, significantly expanded API, new features.
 
 ```ruby
 gem 'smarter_csv', '~> 1.16'
 ```
----
-
-> **New to SmarterCSV?** Start here first:
-> - [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)
-> - [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)
-
 ---
 
 ## Performance: 1.8×–8.6× Faster Than CSV.read
