@@ -3,7 +3,7 @@ title: 'SmarterCSV 1.16 Released — Faster Than CSV.read, Bad Row Quarantine, I
 published: false
 description: 'SmarterCSV 1.16 brings major performance gains (up to 129× faster than CSV.table), a new bad-row quarantine system, a significantly expanded API, and 696 new tests.'
 tags: 'ruby, csv, performance, rails'
-cover_image: https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/releases/smarter_csv-1.16-released/images/smarter_csv-1.16.1-release.png
+cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/releases/smarter_csv-1.16-released/images/smarter_csv-1.16.1-release.png'
 slug: smarter_csv-1.16-released
 id: 3357262
 ---
