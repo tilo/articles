@@ -8,7 +8,7 @@ slug: smarter_csv-1.16-released
 id: 3357262
 ---
 
-SmarterCSV 1.16 is out — it brings major performance gains, a new bad-row quarantine system, a significantly expanded API, and 696 new tests.
+SmarterCSV 1.16 is out — it brings major performance gains, new bad-row quarantine system, instrumentation hooks, significantly expanded API, new features.
 
 ```ruby
 gem 'smarter_csv', '~> 1.16'
@@ -22,7 +22,7 @@ The headline number that usually surprises people: SmarterCSV 1.16 returns **ful
 
 | Comparison | Speedup |
 |---|---|
-| vs `CSV.read` (raw arrays) | **1.7×–8.6× faster** |
+| vs `CSV.read` (raw arrays) | **1.8×–8.6× faster** |
 | vs `CSV.table` (symbol keys + numeric conversion — the fair comparison) | **7×–129× faster** |
 | vs SmarterCSV 1.15.2 | **up to 2.4× faster** |
 | vs SmarterCSV 1.14.4 | **9×–65× faster** |
@@ -101,6 +101,24 @@ Each error record contains:
 }
 ```
 
+### `SmarterCSV.errors` — class-level error access (1.16.1)
+
+Previously, accessing `bad_row_count` after a class-level call required switching to `SmarterCSV::Reader`. 1.16.1 exposes errors directly:
+
+```ruby
+SmarterCSV.process('data.csv', on_bad_row: :skip)
+puts SmarterCSV.errors[:bad_row_count]   # => 3
+
+SmarterCSV.process('data.csv', on_bad_row: :collect)
+puts SmarterCSV.errors[:bad_rows].size   # => 3
+```
+
+`SmarterCSV.errors` is thread-local — each thread in Puma/Sidekiq tracks its own state independently. It stores the result of the most recent call on the current thread.
+
+> ⚠️ **Fibers:** `SmarterCSV.errors` uses `Thread.current`, which is shared across all fibers
+> in the same thread. If you process CSV in fibers (`Async`, `Falcon`, manual `Fiber`
+> scheduling), use `SmarterCSV::Reader` directly — its errors are scoped to the instance.
+
 ### `field_size_limit:` — DoS protection
 
 One unclosed `"` in a large file causes Ruby's `CSV` to read the entire rest of the file into a single field — a silent OOM risk. `field_size_limit: N` raises `FieldSizeLimitExceeded` as soon as any field or accumulating multiline buffer exceeds N bytes:
@@ -126,23 +144,31 @@ rescue SmarterCSV::TooManyBadRows => e
 end
 ```
 
-### `SmarterCSV.errors` — class-level error access (1.16.1)
+### Other new options
 
-Previously, accessing `bad_row_count` after a class-level call required switching to `SmarterCSV::Reader`. 1.16.1 exposes errors directly:
+- **`collect_raw_lines: true`** *(default)*: Include the raw stitched line in bad-row error records. Set to `false` for privacy or memory savings.
+- **`nil_values_matching: regex`**: Set fields matching the regex to `nil`. With `remove_empty_values: true` (default), nil-ified values are removed from the hash. Replaces the deprecated `remove_values_matching:`.
+- **`verbose: :quiet / :normal / :debug`**: Symbol-based verbosity. `:quiet` suppresses all output; `:normal` (default) shows behavioral warnings; `:debug` adds per-row diagnostics to `$stderr`. Replaces the deprecated `verbose: true/false`.
+
+---
+
+## Instrumentation Hooks
 
 ```ruby
-SmarterCSV.process('data.csv', on_bad_row: :skip)
-puts SmarterCSV.errors[:bad_row_count]   # => 3
-
-SmarterCSV.process('data.csv', on_bad_row: :collect)
-puts SmarterCSV.errors[:bad_rows].size   # => 3
+SmarterCSV.process('large_import.csv',
+  chunk_size: 1000,
+  on_start: ->(info) {
+    puts "Starting import of #{info[:file_size]} bytes"
+  },
+  on_chunk: ->(info) {
+    puts "Chunk #{info[:chunk_number]}: #{info[:total_rows_so_far]} rows so far"
+  },
+  on_complete: ->(info) {
+    puts "Done: #{info[:total_rows]} rows in #{info[:duration].round(2)}s"
+    puts "Bad rows: #{info[:bad_rows]}"
+  }
+)
 ```
-
-`SmarterCSV.errors` is thread-local — each thread in Puma/Sidekiq tracks its own state independently. It stores the result of the most recent call on the current thread.
-
-> ⚠️ **Fibers:** `SmarterCSV.errors` uses `Thread.current`, which is shared across all fibers
-> in the same thread. If you process CSV in fibers (`Async`, `Falcon`, manual `Fiber`
-> scheduling), use `SmarterCSV::Reader` directly — its errors are scoped to the instance.
 
 ---
 
@@ -200,26 +226,6 @@ MySQL `SELECT INTO OUTFILE`, PostgreSQL `COPY TO`, and many Unix tools escape qu
 # Both of these parse correctly with the default quote_escaping: :auto
 rows = SmarterCSV.process('mysql_export.csv')    # uses \"
 rows = SmarterCSV.process('excel_export.csv')    # uses ""
-```
-
----
-
-## Instrumentation Hooks
-
-```ruby
-SmarterCSV.process('large_import.csv',
-  chunk_size: 1000,
-  on_start: ->(info) {
-    puts "Starting import of #{info[:file_size]} bytes"
-  },
-  on_chunk: ->(info) {
-    puts "Chunk #{info[:chunk_number]}: #{info[:total_rows_so_far]} rows so far"
-  },
-  on_complete: ->(info) {
-    puts "Done: #{info[:total_rows]} rows in #{info[:duration].round(2)}s"
-    puts "Bad rows: #{info[:bad_rows]}"
-  }
-)
 ```
 
 ---
@@ -314,8 +320,8 @@ These options still work but emit a warning — update when convenient:
 
 ## Further Reading
 
-- **[10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://github.com/tilo/smarter_csv/blob/master/docs/ruby_csv_pitfalls.md)** — the silent failure modes that make switching worthwhile, with reproducible examples for each
-- **[Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://github.com/tilo/smarter_csv/blob/master/docs/migrating_from_csv.md)** — a practical migration guide with before/after examples and a quick-reference options table
+- **[10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)** — the silent failure modes that make switching worthwhile, with reproducible examples for each
+- **[Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)** — a practical migration guide with before/after examples and a quick-reference options table
 
 ---
 
