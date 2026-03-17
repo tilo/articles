@@ -1,5 +1,5 @@
 ---
-title: 'SmarterCSV 1.16 Released — Faster Than CSV.read, Bad Row Quarantine, Instrumentation, new Features, Improved API'
+title: 'SmarterCSV 1.16 Released — Faster Than CSV.read, Bad Row Quarantine, Instrumentation, New Features, Improved API'
 published: false
 description: 'SmarterCSV 1.16 brings major performance gains (up to 129× faster than CSV.table), a new bad-row quarantine system, a significantly expanded API, and 696 new tests.'
 tags: 'ruby, csv, performance, rails'
@@ -31,7 +31,7 @@ Measured on 19 benchmark files, Apple M1 Pro, Ruby 3.4.7. The 129× figure is on
 
 The `CSV.table` comparison is the apples-to-apples one: both produce symbol-keyed hashes with numeric conversion. That's what you actually need in a Rails app.
 
-### What drove the gains
+### What drove these gains
 
 **C extension (accelerated path):**
 - `ParseContext` architecture — all per-file parse options wrapped in a GC-managed `TypedData` object, built once after headers load. Eliminates ~10 `rb_hash_aref` calls per row that previously re-read the options hash on every single row.
@@ -61,6 +61,64 @@ rows = SmarterCSV.process('wide_export.csv',
 
 ---
 
+## Instrumentation Hooks
+
+```ruby
+SmarterCSV.process('large_import.csv',
+  chunk_size: 1000,
+  on_start: ->(info) {
+    puts "Starting import of #{info[:file_size]} bytes"
+  },
+  on_chunk: ->(info) {
+    puts "Chunk #{info[:chunk_number]}: #{info[:total_rows_so_far]} rows so far"
+  },
+  on_complete: ->(info) {
+    puts "Done: #{info[:total_rows]} rows in #{info[:duration].round(2)}s"
+    puts "Bad rows: #{info[:bad_rows]}"
+  }
+)
+```
+
+---
+
+## Expanded Read API
+
+### `SmarterCSV.parse` — parse strings directly
+
+```ruby
+# Before — had to wrap in StringIO
+reader = SmarterCSV::Reader.new(StringIO.new(csv_string))
+
+# Now
+rows = SmarterCSV.parse(csv_string)
+```
+
+Drop-in equivalent of `CSV.parse(str, headers: true, header_converters: :symbol)` — with numeric conversion included.
+
+### `SmarterCSV.each` / `Reader#each` — row-by-row enumerator
+
+`Reader` now includes `Enumerable`:
+
+```ruby
+# Lazy pipeline — process a 10M-row file with constant memory
+SmarterCSV.each('huge.csv')
+  .lazy
+  .select { |row| row[:status] == 'active' }
+  .first(100)
+  .each { |row| MyModel.create!(row) }
+```
+
+### `SmarterCSV.each_chunk` / `Reader#each_chunk`
+
+```ruby
+SmarterCSV.each_chunk('data.csv', chunk_size: 500).each_with_index do |chunk, i|
+  puts "Importing chunk #{i}..."
+  MyModel.import(chunk)
+end
+```
+
+---
+
 ## Bad Row Quarantine
 
 Real-world CSV files are malformed. Until now, SmarterCSV raised on the first bad row and stopped — all-or-nothing. 1.16 adds a full quarantine system.
@@ -70,10 +128,6 @@ Real-world CSV files are malformed. Until now, SmarterCSV raised on the first ba
 ```ruby
 # :raise (default) — fail fast, same as before
 SmarterCSV.process('data.csv')
-
-# :skip — continue, count available afterwards
-SmarterCSV.process('data.csv', on_bad_row: :skip)
-puts SmarterCSV.errors[:bad_row_count]   # => 3
 
 # :collect — continue and keep the error records
 good_rows = SmarterCSV.process('data.csv', on_bad_row: :collect)
@@ -86,6 +140,11 @@ end
 bad_rows = []
 good_rows = SmarterCSV.process('data.csv',
   on_bad_row: ->(rec) { bad_rows << rec })
+
+# :skip — continue, count available afterwards
+SmarterCSV.process('data.csv', on_bad_row: :skip)
+puts SmarterCSV.errors[:bad_row_count]   # => 3
+
 ```
 
 Each error record contains:
@@ -149,64 +208,6 @@ end
 - **`collect_raw_lines: true`** *(default)*: Include the raw stitched line in bad-row error records. Set to `false` for privacy or memory savings.
 - **`nil_values_matching: regex`**: Set fields matching the regex to `nil`. With `remove_empty_values: true` (default), nil-ified values are removed from the hash. Replaces the deprecated `remove_values_matching:`.
 - **`verbose: :quiet / :normal / :debug`**: Symbol-based verbosity. `:quiet` suppresses all output; `:normal` (default) shows behavioral warnings; `:debug` adds per-row diagnostics to `$stderr`. Replaces the deprecated `verbose: true/false`.
-
----
-
-## Instrumentation Hooks
-
-```ruby
-SmarterCSV.process('large_import.csv',
-  chunk_size: 1000,
-  on_start: ->(info) {
-    puts "Starting import of #{info[:file_size]} bytes"
-  },
-  on_chunk: ->(info) {
-    puts "Chunk #{info[:chunk_number]}: #{info[:total_rows_so_far]} rows so far"
-  },
-  on_complete: ->(info) {
-    puts "Done: #{info[:total_rows]} rows in #{info[:duration].round(2)}s"
-    puts "Bad rows: #{info[:bad_rows]}"
-  }
-)
-```
-
----
-
-## Expanded Read API
-
-### `SmarterCSV.parse` — parse strings directly
-
-```ruby
-# Before — had to wrap in StringIO
-reader = SmarterCSV::Reader.new(StringIO.new(csv_string))
-
-# Now
-rows = SmarterCSV.parse(csv_string)
-```
-
-Drop-in equivalent of `CSV.parse(str, headers: true, header_converters: :symbol)` — with numeric conversion included.
-
-### `SmarterCSV.each` / `Reader#each` — row-by-row enumerator
-
-`Reader` now includes `Enumerable`:
-
-```ruby
-# Lazy pipeline — process a 10M-row file with constant memory
-SmarterCSV.each('huge.csv')
-  .lazy
-  .select { |row| row[:status] == 'active' }
-  .first(100)
-  .each { |row| MyModel.create!(row) }
-```
-
-### `SmarterCSV.each_chunk` / `Reader#each_chunk`
-
-```ruby
-SmarterCSV.each_chunk('data.csv', chunk_size: 500).each_with_index do |chunk, i|
-  puts "Importing chunk #{i}..."
-  MyModel.import(chunk)
-end
-```
 
 ---
 
