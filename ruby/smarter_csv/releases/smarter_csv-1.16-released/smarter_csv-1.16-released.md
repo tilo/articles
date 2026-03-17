@@ -8,6 +8,8 @@ slug: smarter_csv-1.16-released
 id: 3357262
 ---
 
+> Fair warning — this one's a long read. But if you've ever had a silent data import bug ruin your day, it's worth it.
+
 SmarterCSV 1.16 is out — it brings major performance gains, new bad-row quarantine system, instrumentation hooks, significantly expanded API, new features.
 
 ```ruby
@@ -309,7 +311,7 @@ These options still work but emit a warning — update when convenient:
 
 ## By the Numbers
 
-| | |
+| | 1.15.1 → 1.16.1 |
 |---|---|
 | RSpec tests | 714 → 1,410 (+696) |
 | Line coverage | 100% |
