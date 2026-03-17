@@ -6,6 +6,7 @@ tags: 'ruby, csv, performance, rails'
 cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/releases/smarter_csv-1.16-released/images/smarter_csv-1.16.1-release.png'
 slug: smarter_csv-1.16-released
 id: 3357262
+date: '2026-03-17T15:16:42Z'
 ---
 
 > **Coffee time ☕** — this one's a long read. But if you've ever had silent data import bugs ruin your day, it's worth it.
