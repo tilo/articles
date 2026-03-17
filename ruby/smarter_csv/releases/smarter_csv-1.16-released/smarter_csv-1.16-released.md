@@ -22,6 +22,20 @@ SmarterCSV 1.16 is out — it brings major performance gains, new bad-row quaran
 ```ruby
 gem 'smarter_csv', '~> 1.16'
 ```
+
+---
+
+**Contents:**
+- [Performance: 1.8×–8.6× Faster Than CSV.read](#performance-18%C3%9786%C3%97-faster-than-csvread)
+- [Instrumentation Hooks](#instrumentation-hooks)
+- [Expanded Read API](#expanded-read-api)
+- [Bad Row Quarantine](#bad-row-quarantine)
+- [Quote Handling Improvements](#quote-handling-improvements)
+- [Writer Improvements](#writer-improvements)
+- [Bug Fixes](#bug-fixes)
+- [Deprecations](#deprecations)
+- [Links](#links)
+
 ---
 
 ## Performance: 1.8×–8.6× Faster Than CSV.read
