@@ -1,6 +1,6 @@
 ---
 title: 'SmarterCSV 1.16 Released — Faster Than CSV.read, Bad Row Quarantine, Instrumentation, New Features, Improved API'
-published: false
+published: true
 description: 'SmarterCSV 1.16 brings major performance gains (up to 129× faster than CSV.table), a new bad-row quarantine system, a significantly expanded API, and 696 new tests.'
 tags: 'ruby, csv, performance, rails'
 cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/releases/smarter_csv-1.16-released/images/smarter_csv-1.16.1-release.png'
@@ -36,7 +36,7 @@ The headline number that usually surprises people: SmarterCSV 1.16 returns **ful
 
 Measured on 19 benchmark files, Apple M1 Pro, Ruby 3.4.7. The 129× figure is on a 117-column import file where `CSV.table`'s overhead compounds with column count.
 
-¹ The `CSV.table` comparison is the apples-to-apples one: both produce symbol-keyed hashes with numeric conversion. That's what you actually need in a Rails app.
+¹ The comparison against `CSV.table` is more apples-to-apples: both produce symbol-keyed hashes with numeric conversion. That's what you actually need in a Rails app — but `CSV.table` has bugs, including silently mis-handling numbers with leading-zero. See [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02).
 
 ### What drove these gains
 
