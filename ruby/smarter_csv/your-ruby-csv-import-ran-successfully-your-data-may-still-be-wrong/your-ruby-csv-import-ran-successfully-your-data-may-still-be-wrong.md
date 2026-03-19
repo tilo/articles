@@ -24,11 +24,4 @@ I wrote up all 10, with reproducible examples you can download and run yourself:
 And if you're ready to switch, SmarterCSV 1.16 is out — now faster than CSV.read end-to-end, with a bad-row quarantine system, and  instrumentation hooks:
 👉 [SmarterCSV 1.16 Released](https://dev.to/tilo_sloboda/smartercsv-116-released-faster-than-csvread-bad-row-quarantine-instrumentation-new-features-2a060)
 
-
-## Links
-
-- **GitHub:** [github.com/tilo/smarter_csv](https://github.com/tilo/smarter_csv)
-- **Docs:** [Full documentation](https://github.com/tilo/smarter_csv/blob/master/docs/_introduction.md)
-- **RubyGems:** [rubygems.org/gems/smarter_csv](https://rubygems.org/gems/smarter_csv)
-
 Found something? Issues and feedback always welcome on GitHub and if I don't respond, don't be shy: ping me on LinkedIn. I love improving the code.
