@@ -25,6 +25,9 @@ But it comes at the cost of boilerplate post-processing you have to write, test,
 
 ## At a Glance
 
+![10 failure modes](https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data/images/10-ways-summary-table.png)
+
+<!--
 | # | Severity | Ruby CSV Issue | Failure Mode | SmarterCSV | SmarterCSV Details |
 |---|:--------:|-------|-------------|:--------------:|---------|
 | 1 | 🔴 | Extra columns silently dropped | Values beyond header count compete for the `nil` key — only the first survives, the rest are discarded | default ✅ | Default `missing_headers: :auto` auto-generates `:column_N` keys |
@@ -37,6 +40,7 @@ But it comes at the cost of boilerplate post-processing you have to write, test,
 | 8 | 🟠 | Backslash-escaped quotes (MySQL/Unix) | `\"` treated as field-closing quote — crash or garbled data | default ✅ | Default `quote_escaping: :auto` handles both RFC 4180 and backslash escaping |
 | 9 | 🔴 | TSV file read as CSV — completely breaks ❌ | Default `col_sep: ","` on a tab-delimited file returns each row as a single string; all column structure lost | default ✅ | Default `col_sep: :auto` detects the actual delimiter — no option needed |
 | 10 | 🔴 | No encoding auto-detection | Non-UTF-8 files either crash or silently produce mojibake | via option | `file_encoding:`, `force_utf8: true`, `invalid_byte_sequence: ''` |
+-->
 
 ¹ Issue #4 can be triggered two ways: `CSV.table` enables `converters: :numeric` by default (no opt-in required), and `CSV.read` triggers the same corruption when passed `converters: :numeric` explicitly. Either way, any leading-zero string field — ZIP codes, customer IDs, product codes — is silently converted to a wrong integer.
 
