@@ -9,11 +9,11 @@ id: 3356453
 date: '2026-03-16T17:03:50Z'
 ---
 
-When having to parse CSV files, many developers go straight to the Ruby `CSV` library — but it comes at the cost of writing boilerplate post-processing, and there are some dangerous pitfalls you might not be aware of.
+When having to parse CSV files, many developers go straight to the Ruby `CSV` library — it ships with Ruby and requires no dependencies.
 
-Ruby's built-in `CSV` library is for many the go-to — it ships with Ruby and requires no dependencies. But it has failure modes that produce **no exception, no warning, and no indication that anything went wrong**. Your import runs, your tests pass, and your data is quietly wrong.
+But it comes at the cost of writing boilerplate post-processing, and there are some failure modes that produce **no exception, no warning, and no indication that anything went wrong**. Your import runs, your tests pass, and your data is quietly wrong.
 
-This article documents ten reproducible ways `CSV.read` (and `CSV.table`) can silently corrupt or lose data, with examples you can run yourself, and how SmarterCSV handles each case.
+`CSV.read` is fine for small, trusted, well-formed files — particularly when you control the source. This article is about what can happen with **messy real-world files files your partners produce, or users upload** — ten reproducible ways `CSV.read` and `CSV.table` can silently corrupt or lose data, with examples you can run yourself, and how SmarterCSV handles each case.
 
 > **Note on `CSV.table`:** It's a convenience wrapper for `CSV.read` with `headers: true`, `header_converters: :symbol`, and `converters: :numeric`.
 
