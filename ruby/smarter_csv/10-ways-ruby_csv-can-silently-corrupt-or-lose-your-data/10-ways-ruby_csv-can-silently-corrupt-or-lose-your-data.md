@@ -520,7 +520,7 @@ rows = CSV.read('data.csv', headers: true).map(&:to_h)
 rows = SmarterCSV.process('data.csv')
 ```
 
-SmarterCSV handles nine of the ten cases out of the box — octal-safe numeric conversion, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, backslash quote escaping, and delimiter auto-detection.
+SmarterCSV handles nine of the ten cases out of the box — octal-safe numeric conversion, whitespace normalization, duplicate header disambiguation, extra column naming, consistent empty value handling, backslash quote escaping, and delimiter auto-detection - no surprises! ✅
 
 The remaining one (encoding control) requires explicit opt-in options, but the building blocks are there. No boilerplate, no post-processing pipeline, no silent data loss.
 
