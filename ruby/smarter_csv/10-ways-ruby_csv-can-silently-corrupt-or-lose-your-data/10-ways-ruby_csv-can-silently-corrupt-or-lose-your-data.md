@@ -15,7 +15,7 @@ But it comes at the cost of boilerplate post-processing you have to write, test,
 
 `CSV.read` is fine for small, trusted, well-formed files — particularly when you control the source. This article is about what can happen with **messy real-world files your partners produce, or users upload** — ten reproducible ways `CSV.read` and `CSV.table` can silently corrupt or lose data, with examples you can run yourself, and how SmarterCSV handles each case.
 
-> Some of these may be gotchas for experienced users - but must be handled every time. Others are genuine traps. All ten are silent.
+> Not all ten may be equally surprising — some are odd behavior that bites you anyway, others are genuine traps. All ten are silent.
 
 ---
 
