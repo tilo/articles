@@ -45,7 +45,7 @@ But it comes at the cost of boilerplate post-processing you have to write, test,
 > `CSV.table` is a convenience wrapper for `CSV.read` with `headers: true`, `header_converters: :symbol`, and `converters: :numeric`.
 
 ---
-##   The Real Cost of Handling This Yourself
+## The Real Cost of Handling This Yourself
 
 Experienced users of `CSV.read` know some of these gotchas and handle them in post-processing — but not all of them can be: some are serious bugs that will silently corrupt your data regardless. And even for the ones you can handle, manual post-processing has five hidden costs:
 
