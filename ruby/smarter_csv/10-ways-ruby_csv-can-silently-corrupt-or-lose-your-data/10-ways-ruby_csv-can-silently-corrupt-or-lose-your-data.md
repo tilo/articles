@@ -17,6 +17,7 @@ But it comes at the cost of boilerplate post-processing you have to write, test,
 
 > Some of these may be gotchas for experienced users - but must be handled every time. Others are genuine traps. All ten are silent.
 
+---
 
 > 💡 **Want to follow along?** Download the [example CSV files](https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data/images/10-ways-ruby_csv-can-silently-corrupt-or-lose-your-data-examples.tgz) and run the examples locally.
 
@@ -54,7 +55,7 @@ Experienced users of `CSV.read` know some of these gotchas and handle them in po
 
 * **Your boilerplate is probably undertested.** Post-processing code that wraps `CSV.read` rarely gets the same test coverage as business logic. Developers don't think of it as the risky part. Data edge cases — files with blank headers, leading-zero IDs, quoted empty fields, mixed encoding — don't make it into the test suite until they cause a production incident. You don't know what your boilerplate misses until a file breaks it.
 
-> Do your tests for your CSV wrapper just test the mechanics, or include data corner cases?
+> ❓ Do your tests for your CSV wrapper just test the mechanics, or include data corner cases?
 
 * **Your benchmarks probably don't include the boilerplate code.** When you chose `CSV.read`, you probably looked at raw parsing performance — but did you measure the end-to-end cost of your post-processing? Whitespace stripping, header cleanup, empty normalization: none of that is free. Your end-to-end data pipeline is much slower than what you initially measured.
 
