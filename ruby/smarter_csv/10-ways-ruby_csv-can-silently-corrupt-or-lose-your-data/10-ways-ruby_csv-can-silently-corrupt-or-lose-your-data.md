@@ -65,19 +65,19 @@ Read on for a detailed explanation and reproducible example for each issue.
 ---
 ##   The Real Cost of Handling This Yourself
 
-Experienced `CSV.read` users often know some of these gotchas and handle them in post-processing. But there are five reasons that approach costs more than it appears:
+Experienced `CSV.read` users often know some of these gotchas and handle them in post-processing. But manual post-processing has five hidden costs:
 
 * **You hand-craft boilerplate for every use case.** The right fix for whitespace differs when headers have spaces vs. values have spaces vs. both. Encoding handling depends on the source system. There is no generic post-processing snippet — you write a slightly different version every time.
 
-* **You have to remember all of it, every time.** A new team member imports a file. A new service starts accepting uploads. A cron job gets a new data source. The gotchas don't announce themselves — you only catch them if you remember to look. Most production CSV bugs were introduced not by someone who didn't know better, but by someone who was moving fast and forgot.
+* **You have to remember all of it, every time.** Every new import, service, or data source needs the same gotchas handled — consistently. But boilerplate doesn't enforce itself. A fix you wrote for one importer doesn't automatically apply to the next. The gotchas don't announce themselves — you only catch them if you remember to look.
 
-* **Your boilerplate is probably undertested.** Post-processing code that wraps CSV.read rarely gets the same test coverage as business logic. Developers don't think of it as the risky part. Data edge cases — files with blank headers, leading-zero IDs, quoted empty fields, mixed encoding — don't make it into the test suite until they cause a production incident. You don't know what your boilerplate misses until a file breaks it.
+* **Your boilerplate is probably undertested.** Post-processing code that wraps `CSV.read` rarely gets the same test coverage as business logic. Developers don't think of it as the risky part. Data edge cases — files with blank headers, leading-zero IDs, quoted empty fields, mixed encoding — don't make it into the test suite until they cause a production incident. You don't know what your boilerplate misses until a file breaks it.
 
-> Do your tests for your CSV wrapper include data quirks, or just test the mechanics?
+> Do your tests for your CSV wrapper just test the mechanics, or include data anomalies?
 
-* **Your benchmarks probably don't include the boilerplate code.** When developers compare CSV parsing performance, they benchmark CSV.read against the raw file — not CSV.read plus the normalization pipeline that makes the data actually usable. Stripping whitespace, re-keying headers, normalizing empties, validating column counts: none of that is free. The number you're optimizing for isn't the number that reflects your real workload.
+* **Your benchmarks probably don't include the boilerplate code.** When you chose `CSV.read`, you probably looked at raw parsing performance — but did you measure the end-to-end cost of your post-processing? Whitespace stripping, header cleanup, empty normalization: none of that is free. Your end-to-end data pipeline is much slower than what you initially measured.
 
-* **One library that handles it predictably is worth more than the sum of its parts.** The value isn't just "these ten cases are covered." It's that you stop maintaining a bespoke cleaning pipeline, stop writing one-off fixes after production surprises, and stop explaining your CSV quirks to every new developer who touches the import code.
+ * **One library that handles it predictably and performant is worth more than the sum of its parts.** The value isn't "these ten cases are covered." It is that you stop maintaining a bespoke cleaning pipeline, stop writing one-off fixes after production surprises, and don't have to worry about test coverage or performance - you can trust that the default behavior handles edge cases sensibly — without silently damaging your data.
 
 Predictable behavior in a well-tested library beats hand-crafted boilerplate that anticipates fewer edge cases.
 
