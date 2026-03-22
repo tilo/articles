@@ -46,7 +46,7 @@ But it comes at the cost of boilerplate post-processing you have to write, test,
 ---
 ##   The Real Cost of Handling This Yourself
 
-Experienced `CSV.read` users often know some of these gotchas and handle them in post-processing. But manual post-processing has five hidden costs:
+Experienced users of `CSV.read` know some of these gotchas and handle them in post-processing — but not all of them can be: some are serious bugs that will silently corrupt your data regardless. And even for the ones you can handle, manual post-processing has five hidden costs:
 
 * **You hand-craft boilerplate for every use case.** The right fix for whitespace differs when headers have spaces vs. values have spaces vs. both. Encoding handling depends on the source system. There is no generic post-processing snippet — you write a slightly different version every time.
 
