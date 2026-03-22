@@ -131,7 +131,7 @@ rows.first
 
 ---
 
-## 2. Duplicate Header Names — First Value Silently Dropped
+## 2. Duplicate Header Names — Second Value Silently Dropped
 
 When two columns share the same header name, `CSV::Row#to_h` keeps only the **first** value. Later values are silently dropped.
 
@@ -405,8 +405,7 @@ rows = CSV.read('example8.csv', headers: true)
 
 ```ruby
 rows = CSV.read('example8.csv', headers: true, liberal_parsing: true)
-rows[0]['note']   # => "\"She said \\\"hello\\\" to everyone\""
-#                        ^^^ extra surrounding quotes — field was mis-parsed
+rows[0]['note']   # => 'She said \"hello\" to everyone'
 ```
 
 No exception. No warning. The note field has extra wrapping quotes and mangled escaping — it won't compare, display, or serialize correctly.
@@ -417,7 +416,7 @@ No exception. No warning. The note field has extra wrapping quotes and mangled e
 
 ```ruby
 rows = SmarterCSV.process('example8.csv')
-rows[0]   # => {name: "Alice", note: "She said \"hello\" to everyone"}
+rows[0]   # => {name: "Alice", note: 'She said \"hello\" to everyone'}
 rows[1]   # => {name: "Bob",   note: "Normal note"}
 ```
 
