@@ -43,6 +43,24 @@ But it comes at the cost of boilerplate post-processing you have to write, test,
 
 > `CSV.table` is a convenience wrapper for `CSV.read` with `headers: true`, `header_converters: :symbol`, and `converters: :numeric`.
 
+---
+##   The Real Cost of Handling This Yourself
+
+Experienced `CSV.read` users often know some of these gotchas and handle them in post-processing. But manual post-processing has five hidden costs:
+
+* **You hand-craft boilerplate for every use case.** The right fix for whitespace differs when headers have spaces vs. values have spaces vs. both. Encoding handling depends on the source system. There is no generic post-processing snippet — you write a slightly different version every time.
+
+* **You have to remember all of it, every time.** Every new import, service, or data source needs the same gotchas handled — consistently. But boilerplate doesn't enforce itself. A fix you wrote for one importer doesn't automatically apply to the next. The gotchas don't announce themselves — you only catch them if you remember to look.
+
+* **Your boilerplate is probably undertested.** Post-processing code that wraps `CSV.read` rarely gets the same test coverage as business logic. Developers don't think of it as the risky part. Data edge cases — files with blank headers, leading-zero IDs, quoted empty fields, mixed encoding — don't make it into the test suite until they cause a production incident. You don't know what your boilerplate misses until a file breaks it.
+
+> Do your tests for your CSV wrapper just test the mechanics, or include data corner cases?
+
+* **Your benchmarks probably don't include the boilerplate code.** When you chose `CSV.read`, you probably looked at raw parsing performance — but did you measure the end-to-end cost of your post-processing? Whitespace stripping, header cleanup, empty normalization: none of that is free. Your end-to-end data pipeline is much slower than what you initially measured.
+
+* **One library that handles it predictably and performant is worth more than the sum of its parts.** The value isn't "these ten cases are covered." It is that you stop maintaining a bespoke cleaning pipeline, stop writing one-off fixes after production surprises, and don't have to worry about test coverage or performance - you can trust that the default behavior handles edge cases sensibly — without silently damaging your data.
+
+Predictable behavior in a well-tested library beats hand-crafted boilerplate that anticipates fewer edge cases.
 
 ---
 
@@ -61,25 +79,6 @@ The defensive post-processing code required to handle all ten cases correctly �
 ³ These aren't rounding errors or truncations — they are completely different numbers. [Octal](https://en.wikipedia.org/wiki/Octal) is a base-8 number system from the early days of computing, still used in low-level Unix file permissions and C integer literals. It has no place in CSV data. No spreadsheet, ERP system, or database exports ZIP codes or customer IDs in octal — but Ruby CSV silently assumes that's exactly what a leading zero means.
 
 Read on for a detailed explanation and reproducible example for each issue.
-
----
-##   The Real Cost of Handling This Yourself
-
-Experienced `CSV.read` users often know some of these gotchas and handle them in post-processing. But manual post-processing has five hidden costs:
-
-* **You hand-craft boilerplate for every use case.** The right fix for whitespace differs when headers have spaces vs. values have spaces vs. both. Encoding handling depends on the source system. There is no generic post-processing snippet — you write a slightly different version every time.
-
-* **You have to remember all of it, every time.** Every new import, service, or data source needs the same gotchas handled — consistently. But boilerplate doesn't enforce itself. A fix you wrote for one importer doesn't automatically apply to the next. The gotchas don't announce themselves — you only catch them if you remember to look.
-
-* **Your boilerplate is probably undertested.** Post-processing code that wraps `CSV.read` rarely gets the same test coverage as business logic. Developers don't think of it as the risky part. Data edge cases — files with blank headers, leading-zero IDs, quoted empty fields, mixed encoding — don't make it into the test suite until they cause a production incident. You don't know what your boilerplate misses until a file breaks it.
-
-> Do your tests for your CSV wrapper just test the mechanics, or include data anomalies?
-
-* **Your benchmarks probably don't include the boilerplate code.** When you chose `CSV.read`, you probably looked at raw parsing performance — but did you measure the end-to-end cost of your post-processing? Whitespace stripping, header cleanup, empty normalization: none of that is free. Your end-to-end data pipeline is much slower than what you initially measured.
-
- * **One library that handles it predictably and performant is worth more than the sum of its parts.** The value isn't "these ten cases are covered." It is that you stop maintaining a bespoke cleaning pipeline, stop writing one-off fixes after production surprises, and don't have to worry about test coverage or performance - you can trust that the default behavior handles edge cases sensibly — without silently damaging your data.
-
-Predictable behavior in a well-tested library beats hand-crafted boilerplate that anticipates fewer edge cases.
 
 ---
 
@@ -206,7 +205,7 @@ rows.first
 
 ## 4. `converters: :numeric` Silently Corrupts Leading-Zero Values as Octal
 
-`converters: :numeric` The result is not just "leading zeros stripped" — the entire number is silently converted to a completely different value³ that looks plausible but is incorrect ❌ .
+`converters: :numeric` When numbers have leading zeroes, the result does not just strip them - the entire number is silently converted to a completely different value³ that looks plausible but is incorrect ❌ .
 
 `CSV.table` enables `converters: :numeric` by default without any opt-in, **triggering the bug by default**. `CSV.read` is safe by default, but triggers the same corruption when `converters: :numeric` (or `converters: :integer`) is passed explicitly.
 
