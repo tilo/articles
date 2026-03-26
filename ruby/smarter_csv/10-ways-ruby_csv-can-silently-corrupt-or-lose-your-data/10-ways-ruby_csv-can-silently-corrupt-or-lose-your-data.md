@@ -61,7 +61,7 @@ Experienced users of `CSV.read` know some of these gotchas and handle them in po
 
 > ❓ Do your tests for your CSV wrapper just test the mechanics, or include data corner cases?
 
-* **Your benchmarks probably don't include the boilerplate code.** When you chose `CSV.read`, you probably looked at raw parsing performance — but did you measure the end-to-end cost of your post-processing? Whitespace stripping, header cleanup, empty normalization: none of that is free. Your end-to-end data pipeline is much slower than what you initially measured.
+* **Your benchmarks probably don't include the boilerplate code.** When you chose `CSV.read`, you probably looked at raw parsing performance — but did you measure the end-to-end cost of your post-processing? Whitespace stripping, header cleanup, empty normalization: none of that is free. Your end-to-end data pipeline is much slower than what you initially measured. SmarterCSV 1.16 benchmarks at [**1.8×–8.6× faster than `CSV.read`** end-to-end](https://dev.to/tilo_sloboda/smartercsv-116-released-faster-than-csvread-bad-row-quarantine-instrumentation-new-features-2a06) — before you even factor in the boilerplate you no longer write.
 
 * **One library that handles it predictably and performant is worth more than the sum of its parts.** The value isn't "these ten cases are covered." It is that you stop maintaining a bespoke cleaning pipeline, stop writing one-off fixes after production surprises, and don't have to worry about test coverage or performance - you can trust that the default behavior handles edge cases sensibly — without silently damaging your data.
 
@@ -524,6 +524,7 @@ SmarterCSV handles nine of the ten cases out of the box — octal-safe numeric c
 
 The remaining one (encoding control) requires explicit opt-in options, but the building blocks are there. No boilerplate, no post-processing pipeline, no silent data loss.
 
+And it's not a trade-off on speed: SmarterCSV 1.16 benchmarks at **1.8×–8.6× faster than `CSV.read`** end-to-end, and up to **129× faster than `CSV.table`** — see the [SmarterCSV 1.16 release notes](https://dev.to/tilo_sloboda/smartercsv-116-released-faster-than-csvread-bad-row-quarantine-instrumentation-new-features-2a06) for full benchmark details.
 
 > **Ready to switch?** → [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)
 
