@@ -3,7 +3,7 @@ title: Your Ruby CSV Import Ran Successfully — Your Data May Still Be Wrong
 published: false
 description: '10 failure modes in Ruby CSV that produce no exception, no warning, and no indication that anything went wrong. Your import runs. Your tests pass. Your data is quietly wrong.'
 tags: 'ruby, csv, rails, DataEngineering'
-cover_image: images/your-ruby-csv-import-1.png
+cover_image: images/your-ruby-csv-import-2.png
 slug: your-ruby-csv-import-ran-successfully-your-data-may-still-be-wrong
 id: 3370680
 ---
