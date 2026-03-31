@@ -6,6 +6,7 @@ tags: 'ruby, csv, rails, DataEngineering'
 cover_image: images/your-ruby-csv-import-3.png
 slug: your-ruby-csv-import-ran-successfully-your-data-may-still-be-wrong
 id: 3370680
+date: '2026-03-31T20:28:53Z'
 ---
 
 > Are you sure that Ruby CSV imported all your data — and correctly? 🤔
