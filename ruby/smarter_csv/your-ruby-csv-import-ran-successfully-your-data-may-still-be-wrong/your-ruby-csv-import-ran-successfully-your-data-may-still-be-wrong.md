@@ -22,7 +22,7 @@ Or this: a user uploads a tab-separated file named `.csv` — your file-type gua
 I wrote up all 10, with reproducible examples you can download and run yourself:
 👉 [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)
 
-If you're ready to switch, SmarterCSV 1.16 is out — 1.8×–8.6× faster than `CSV.read` end-to-end, with a bad-row quarantine system, and  instrumentation hooks:
+SmarterCSV 1.16 addresses all of these — 1.8×–8.6× faster than `CSV.read` end-to-end, with a bad-row quarantine system, and instrumentation hooks:
 👉 [SmarterCSV 1.16 Released](https://dev.to/tilo_sloboda/smartercsv-116-released-faster-than-csvread-bad-row-quarantine-instrumentation-new-features-2a06)
 
 Found something? Issues and feedback and bug reports are always welcome in the [GitHub Discussions](https://github.com/tilo/smarter_csv/discussions) or [Issues](https://github.com/tilo/smarter_csv/issues).
