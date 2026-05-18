@@ -3,7 +3,7 @@ title: 'Introducing roo-smarter_csv — A Drop-In Roo CSV Backend That''s 3–4.
 published: false
 description: 'roo-smarter_csv replaces Roo''s built-in CSV backend with SmarterCSV. Same Roo spreadsheet API, 3–4.6× faster parsing, automatic col_sep / row_sep detection, and robust handling of real-world CSV files.'
 tags: 'ruby, csv, roo, rails'
-cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/introducing-roo-smarter_csv/images/roo-smarter_csv-cover.png'
+cover_image:
 slug: introducing-roo-smarter_csv
 date: '2026-05-18T00:00:00Z'
 ---
