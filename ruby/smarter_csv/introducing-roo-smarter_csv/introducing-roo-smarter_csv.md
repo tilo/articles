@@ -9,13 +9,7 @@ date: '2026-05-18T00:00:00Z'
 id: 3696158
 ---
 
-> **New to SmarterCSV?** Start here:
-> - [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)
-> - [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)
-
----
-
-Roo is great at hiding the differences between CSV, XLSX, ODS, and friends behind one spreadsheet-style API, but its CSV processing is slow.
+**Roo** is great at hiding the differences between CSV, XLSX, ODS, and friends behind one spreadsheet-style API, but its CSV processing is slow.
 
 Meet [**roo-smarter_csv**](https://github.com/tilo/roo-smarter_csv) — a drop-in backend that makes Roo's CSV path **3–4.6× faster** and significantly more robust against messy real-world data, without changing a single line of your existing Roo code.
 
@@ -276,6 +270,12 @@ If you're starting fresh and don't need Roo's multi-format abstraction, use Smar
 
 ---
 
+## Further Reading
+
+- **[10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)**
+- **[Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)**
+
+---
 ## That's it ✨
 
 ```ruby
