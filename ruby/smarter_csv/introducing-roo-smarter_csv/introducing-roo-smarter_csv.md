@@ -270,10 +270,10 @@ If you're starting fresh and don't need Roo's multi-format abstraction, use Smar
 
 ---
 
-## Further Reading
-
-- **[10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)**
-- **[Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)**
+> New to SmarterCSV?
+>
+> - [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02)
+> - [Switch from Ruby CSV to SmarterCSV in 5 Minutes](https://dev.to/tilo_sloboda/switch-from-ruby-csv-to-smartercsv-in-5-minutes-3636)
 
 ---
 ## That's it ✨
@@ -287,6 +287,8 @@ require 'roo-smarter_csv'
 ```
 
 Two lines, no API change, 3–4.6× faster CSV imports and much better tolerance for real-world data.
+
+---
 
 * **GitHub:** [github.com/tilo/roo-smarter_csv](https://github.com/tilo/roo-smarter_csv)
 * **RubyGems:** [rubygems.org/gems/roo-smarter_csv](https://rubygems.org/gems/roo-smarter_csv)
