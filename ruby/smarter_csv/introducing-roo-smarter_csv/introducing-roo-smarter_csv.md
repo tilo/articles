@@ -5,7 +5,7 @@ description: 'roo-smarter_csv replaces Roo''s built-in CSV backend with SmarterC
 tags: 'ruby,csv,roo,rails'
 cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_csv/introducing-roo-smarter_csv/images/roo-smarter_csv_1.0.0.png'
 slug: introducing-roo-smarter_csv
-date: '2026-05-19T00:00:00Z'
+date: '2026-05-19T16:00:00Z'
 id: 3696158
 ---
 
