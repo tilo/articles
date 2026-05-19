@@ -91,7 +91,7 @@ All three Just Work.
 
 ### Automatic numeric conversion
 
-`convert_values_to_numeric: true` is on by default. Cells containing `"30"` become `30`, `"1.5"` becomes `1.5`. With Ruby's CSV you'd write the coercion yourself, or pass `converters: :numeric` and pray you don't have ZIP codes with leading zeros (SmarterCSV handles those correctly).
+`convert_values_to_numeric: true` is on by default. Cells containing `"30"` become `30`, `"1.5"` becomes `1.5`. With Ruby's CSV you'd write the coercion yourself, or pass `converters: :numeric` and pray you don't have ZIP codes with leading zeros (Ruby CSV mangles those - SmarterCSV handles those correctly).
 
 ```ruby
 spreadsheet.cell(2, 2)   # => 30        (Integer, not "30")
@@ -100,7 +100,7 @@ spreadsheet.cell(2, 4)   # => 1.5       (Float, not "1.5")
 
 ### UTF-8 BOM handling
 
-Excel loves to write a UTF-8 BOM at the start of CSV files. Ruby's CSV will happily put a `﻿` at the start of your first header. SmarterCSV strips the BOM transparently — your first column header is the actual header.
+Excel loves to write a UTF-8 BOM at the start of CSV files. Ruby's CSV will happily put a `<0xfeff>` at the start of your first header. SmarterCSV strips the BOM transparently — your first column header is the actual header.
 
 ### Robust quote handling
 
