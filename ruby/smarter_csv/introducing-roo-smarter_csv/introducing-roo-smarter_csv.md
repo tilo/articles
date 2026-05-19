@@ -1,5 +1,5 @@
 ---
-title: Introducing roo-smarter_csv — A Drop-In Roo CSV Backend That's 3–4.6× Faster
+title: Introducing roo-smarter_csv — A Drop-In Roo CSV Backend That's 3–4.6x Faster
 published: false
 description: 'roo-smarter_csv replaces Roo''s built-in CSV backend with SmarterCSV. Same Roo spreadsheet API, 3–4.6× faster parsing, automatic col_sep / row_sep detection, and robust handling of real-world CSV files.'
 tags: 'ruby, csv, roo, rails'
@@ -43,7 +43,7 @@ But for CSV specifically, Roo delegates to Ruby's built-in `CSV` library. There 
 
 1. **It's slow.** Ruby's `CSV` is the bottleneck in many real-world Roo CSV pipelines.
 2. **It requires manual configuration.** You need to provide the parameters for column and row separators, amongst other things.
-3. **It's fragile against real-world data.** Inconsistent separators, BOMs, mixed quote styles, embedded newlines, and numeric coercion edge cases routinely cause silent data corruption — see [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02) for a tour.
+3. **It's fragile against real-world data.** Inconsistent separators, BOMs, mixed quote styles, embedded newlines, and numeric coercion edge cases can cause silent data corruption — see [10 Ways Ruby's CSV.read Can Silently Corrupt or Lose Your Data](https://dev.to/tilo_sloboda/10-ways-rubys-csvread-can-silently-corrupt-or-lose-your-data-1g02) for a tour.
 
 `roo-smarter_csv` swaps SmarterCSV in as the parser while keeping Roo's spreadsheet API as the public model. SmarterCSV has been around for **14 years** — a battle-tested library you can rely on. You get its speed, robustness, and automatic detection of parameters — and nothing about how you call Roo changes.
 
