@@ -15,9 +15,9 @@ id: 3696158
 
 ---
 
-If you're using [Roo](https://github.com/roo-rb/roo) to read CSV files in a Ruby or Rails app, there's now a **drop-in backend** that makes Roo's CSV path **3–4.6× faster** and significantly more robust against messy real-world data — without changing a single line of your existing Roo code.
+Roo is great at hiding the differences between CSV, XLSX, ODS, and friends behind one spreadsheet-style API, but its CSV processing is slow.
 
-Meet [**roo-smarter_csv**](https://github.com/tilo/roo-smarter_csv).
+Meet [**roo-smarter_csv**](https://github.com/tilo/roo-smarter_csv) — a drop-in backend that makes Roo's CSV path **3–4.6× faster** and significantly more robust against messy real-world data, without changing a single line of your existing Roo code.
 
 ```ruby
 gem 'roo-smarter_csv'
@@ -37,9 +37,7 @@ That's the whole integration. `Roo::Spreadsheet.open`, `cell`, `row`, `column`, 
 
 ## Why a new backend?
 
-Roo is great at hiding the differences between CSV, XLSX, ODS, and friends behind one spreadsheet-style API.
-
-But for CSV specifically, Roo delegates to Ruby's built-in `CSV` library. There are three long-standing **problems with Ruby `CSV`**:
+For CSV specifically, Roo delegates to Ruby's built-in `CSV` library, and there are three long-standing **problems with Ruby `CSV`**:
 
 1. **It's slow.** Ruby's `CSV` is the bottleneck in many real-world Roo CSV pipelines.
 2. **It requires manual configuration.** You need to provide the parameters for column and row separators, amongst other things.
