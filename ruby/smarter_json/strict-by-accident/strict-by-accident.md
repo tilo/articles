@@ -35,19 +35,21 @@ The striking thing across years of these reports is how modest the request is. B
 
 > *"Comments, trailing commas, and 64-bit integers. That's all I want. Is that really so much? :("*
 
+That was 2015. The same request now covers everything new in how data arrives: read an NDJSON log or export without splitting it by hand; pull the JSON out of an LLM's reply, fences and prose included; take an HJSON-style config with its comments and unquoted keys.
+
 That's the whole list. Read what I meant. Don't lose my data over punctuation. Tell me what you fixed. It's not a request for a new format — it's a request for a reader that handles real-world input.
 
 ## A different starting point
 
-I built SmarterCSV on one principle: hand back the most usable data, so the user is successful. Rejecting a whole file over one comma is diametrically the opposite. Today's JSON parsers are just that — *parsers*: algorithms designed to police correctness, not maximize usability or user satisfaction.
+I built SmarterCSV on one principle: hand back all the usable data, so the user is successful. Rejecting a whole file over one comma is diametrically the opposite. Today's JSON parsers are just that — *parsers*: algorithms designed to police correctness, not maximize usability or user satisfaction.
 
 ## Why isn't every parser built that way?
 
-The answer is in the word: it's a *parser*. A parser answers one question — does this input conform to the grammar, yes or no? That is **recognition**. It's the right question when you're checking that a machine produced spec-clean output. It's the wrong question when a file lands on your desk and you want the data out of it. That second job is **extraction**.
+The answer is in the word: it's a *parser*. A parser answers one question — does this input conform to the grammar, yes or no? That is **recognition**. It's the right question when you're checking that a machine produced spec-clean output. It's the wrong question when you have no control over who generates the input and you want the data out of it. That second job is **extraction**.
 
-Recognition and extraction pull in opposite directions. A recognizer's correct answer to "there's a comma on line 147" is *no* — reject the document. An extractor's correct answer is: *here's your data; I ignored a comma on line 147.* Same input, opposite result. Most of the time you wanted the second one.
+Recognition and extraction pull in opposite directions. A recognizer's correct answer to "there's a comma on line 147" is a *"no"* — reject the document. An extractor's correct answer is: *"here's your data; I ignored a comma on line 147."* Same input, opposite result. Most of the time you wanted the second one.
 
-Nobody decided JSON parsing should be this strict. It's a side effect of how parsers are built.
+Nobody decided JSON parsing should be this strict. It's a side effect of how parsers are built historically.
 
 ---
 
