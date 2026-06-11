@@ -93,27 +93,27 @@ I built one: [SmarterJSON](https://github.com/tilo/smarter_json), a JSON process
 
 Here's the honest scorecard against the complaints above:
 
-| Theme   | The pain                                                          | SmarterJSON                                           |
-| ------- | ----------------------------------------------------------------- | ----------------------------------------------------- |
-| **T1**  | Too strict for hand-written input (no comments / trailing commas) | Addressed                                             |
-| **T2**  | One syntax error throws away the whole document                   | Addressed — reads the rest, reports what it skipped   |
-| **T3**  | LLM JSON is almost-valid (fences, prose, trailing commas)         | Addressed — wrapper recovery                          |
-| **T4**  | JSON buried in prose / markdown must be found first               | Addressed — extracts the payload                      |
-| **T5**  | NDJSON / concatenated docs rejected at the 2nd document           | Addressed — one call returns every document           |
-| **T6**  | High-precision numbers silently rounded to Float                  | Addressed — BigDecimal by default, Float opt-in       |
-| **T7**  | Duplicate keys = undefined behavior (and a security footgun)      | Addressed — explicit policy, every duplicate reported |
-| **T8**  | Strict parsers are the wrong default for input you don't control  | Addressed — the core idea                             |
-| **T9**  | Weak diagnostics — "it fixed something but I don't know what"     | Addressed — line/column + a warning per fix           |
-| **T10** | A single huge document exhausts memory                            | Partial — multi-doc streams; single huge doc post-1.0 |
-| **T11** | Hand-editing JSON is painful                                      | Addressed — comments, unquoted keys, implicit root    |
-| **T12** | Parses fine but wrong type (`"42"` vs `42`)                       | Not — by design — that's a schema's job               |
-| **T13** | Truncated / cut-off JSON                                          | Not — by design — won't invent missing data           |
-| **T14** | Every tool reinvents JSON handling with its own bugs              | Addressed for Ruby (not other languages)              |
-| **T15** | No Date / extended types (MongoDB `ObjectId`, …)                  | Partial — big ints safe; dates are a schema's job     |
-| **T16** | Dialect fragmentation (JSON5 / JSONC / HJSON / …)                 | Addressed — one superset, no dialect to pick          |
-| **T17** | Leniency assumed to cost speed                                    | Addressed — lenient and fast                          |
-| **T18** | Security at the boundary (parser differentials)                   | Partial — deterministic and observable, not "safer"   |
-| **T19** | One bad payload = production incident                             | Addressed — survive a bad payload                     |
+| The pain                                                          | SmarterJSON                                           |
+| ----------------------------------------------------------------- | ----------------------------------------------------- |
+| Too strict for hand-written input (no comments / trailing commas) | Addressed                                             |
+| One syntax error throws away the whole document                   | Addressed — reads the rest, reports what it skipped   |
+| LLM JSON is almost-valid (fences, prose, trailing commas)         | Addressed — wrapper recovery                          |
+| JSON buried in prose / markdown must be found first               | Addressed — extracts the payload                      |
+| NDJSON / concatenated docs rejected at the 2nd document           | Addressed — one call returns every document           |
+| High-precision numbers silently rounded to Float                  | Addressed — BigDecimal by default, Float opt-in       |
+| Duplicate keys = undefined behavior (and a security footgun)      | Addressed — explicit policy, every duplicate reported |
+| Strict parsers are the wrong default for input you don't control  | Addressed — the core idea                             |
+| Weak diagnostics — "it fixed something but I don't know what"     | Addressed — line/column + a warning per fix           |
+| A single huge document exhausts memory                            | Partial — multi-doc streams; single huge doc post-1.0 |
+| Hand-editing JSON is painful                                      | Addressed — comments, unquoted keys, implicit root    |
+| Parses fine but wrong type (`"42"` vs `42`)                       | Not — by design — that's a schema's job               |
+| Truncated / cut-off JSON                                          | Not — by design — won't invent missing data           |
+| Every tool reinvents JSON handling with its own bugs              | Addressed for Ruby (not other languages)              |
+| No Date / extended types (MongoDB `ObjectId`, …)                  | Partial — big ints safe; dates are a schema's job     |
+| Dialect fragmentation (JSON5 / JSONC / HJSON / …)                 | Addressed — one superset, no dialect to pick          |
+| Leniency assumed to cost speed                                    | Addressed — lenient and fast                          |
+| Security at the boundary (parser differentials)                   | Partial — deterministic and observable, not "safer"   |
+| One bad payload = production incident                             | Addressed — survive a bad payload                     |
 
 Fourteen addressed, three partial, two it won't do. The two "won'ts" are the point: a tool that never invents data is more trustworthy than one that guesses.
 
