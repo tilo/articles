@@ -17,7 +17,7 @@ It wasn't. The same problem shows up again and again — in JavaScript, Python, 
 
 ## What developers keep hitting
 
-**Almost-JSON from language models.** This is the loudest complaint of the last two years. You ask a model for JSON and get something almost right: wrapped in a ` ```json ` fence, followed by "Let me know if you need anything else!", a trailing comma, a number quoted as a string. One developer stated the reliability problem directly: *"It works 95% of the time. The other 5%, you get markdown-wrapped JSON, missing fields, extra commentary… your downstream code crashes."* Prompting harder doesn't fix a probabilistic producer; it moves the failures around.
+**Almost-JSON from language models.** This is the loudest complaint of the last two years. You ask a model for JSON and get something almost right: wrapped in a ```` ```json ```` fence, followed by "Let me know if you need anything else!", a trailing comma, a number quoted as a string. One developer stated the reliability problem directly: *"It works 95% of the time. The other 5%, you get markdown-wrapped JSON, missing fields, extra commentary… your downstream code crashes."* Prompting harder doesn't fix a probabilistic producer; it moves the failures around.
 
 **One tiny edit, total failure.** The comma above is the common case. One developer removed 154 trailing commas by hand to get a formatter to run — *"I had a lot more important stuff to do."* Another report traces an hour-long webhook outage to a single comma on line 147 of a 200-line config. The data was fine; the byte wasn't.
 
