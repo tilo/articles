@@ -55,9 +55,9 @@ Nobody decided JSON parsing should be this strict. It's a side effect of how par
 
 > ### Sidebar — How JSON parsing got strict
 >
-> JSON was designed around 2001 to move data between machines — AJAX payloads, API responses. json.org went up in 2002; AJAX drove adoption by 2005–06; in 2006 it got its first formal spec, **RFC 4627**. (ECMA-404 followed in 2013; the current Internet Standard, **RFC 8259**, in 2017.)
+> JSON was designed around 2001 to move data between machines; larger adoption by 2005–06; then **RFC 4627**, ECMA-404, and finally **RFC 8259** followed.
 >
-> In that world, strictness was correct. The producer was a program. A program that emits a stray comma doesn't have messy-but-usable data — it has a bug, and you want the parser to stop and point at it. Strict parsing was a reasonable bet that the producer is careful. (Even the spec loosened over time: in 2014, RFC 7159 made a bare string or number a valid JSON text.)
+> In the early 2000's, strictness was correct. The producer was a program. A program that emits a stray comma doesn't have messy-but-usable data — it has a bug, and you want the parser to stop and point at it. Strict parsing was a reasonable bet that the producer is careful. (Even the spec loosened over time: in 2014, RFC 7159 made a bare string or number a valid JSON text.)
 >
 > Two decades changed the producer. It's now a human editing a config, an LLM emitting almost-JSON, a vendor exporting its own dialect, a tool that calls everything `.json` regardless of flavor.
 >
