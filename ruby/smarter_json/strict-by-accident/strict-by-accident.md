@@ -126,3 +126,4 @@ The takeaway isn't that JSON parsers are bad. They're good at the job they were 
 - **Dialect fragmentation.** *Should we consolidate the human-readable JSON efforts?* — json5 issue #190: <https://github.com/json5/json5/issues/190>
 - **Leniency by design.** "per specifications, json parsing is not lenient, html parsing is lenient" (Hacker News): <https://news.ycombinator.com/item?id=35475222>
 - **Ruby specifics.** Jean Boussier (byroot), *Optimizing Ruby's JSON* (2024) — why "stdlib json is slow" is outdated: <https://byroot.github.io/ruby/json/2024/12/15/optimizing-ruby-json-part-1.html>
+
