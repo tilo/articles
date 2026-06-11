@@ -23,13 +23,13 @@ It wasn't. The same problem shows up again and again — in JavaScript, Python, 
 
 **NDJSON / JSON Lines.** Logs, exports, event streams, and ML datasets are usually newline-delimited JSON — one object per line. `JSON.parse(File.read("events.jsonl"))` fails on the second line, because the file isn't one JSON value. So you split and loop by hand. Uploading a `.jsonl` to OpenAI's batch API, a developer got *"This line is not parseable as valid JSON"* — for a valid file. The cause was a UTF-8 byte-order mark at the start of the file. The error named the wrong thing; the real cause was an invisible byte.
 
-**Comments.** JSON has no comments, so config files can't be annotated. The common workaround is to strip comments with a regex before parsing. As one developer noted, once you do that *"your JSON is no longer universally-parseable by any language's JSON library."* The workaround is worse than the gap it fills.
+**Comments.** JSON has no comments, so config files can't be annotated. The common workaround is to either strip comments with a regex before parsing, or to use a configuration option to allow comments. Risky move - what if you get it wrong? The workaround might be worse than the gap it fills.
 
 **Precision, duplicate keys, and dialects.** High-precision numbers — a 64-bit ID, a financial decimal — get silently rounded to a float. Duplicate keys resolve differently across parsers, which is a documented source of security bugs. And "JSON" is not one format but several near-dialects — JSON5, JSONC, NDJSON, whatever your last vendor exported — and you often can't tell which one a `.json` file is until it fails.
 
-When the standard tools won't bend, people build their own. In 2016 a developer named Pēteris was handed a few gigabytes of JSON, most of it fine but scattered with lines a strict parser rejects — a number written `45.`, a `nan` in place of `null`, a stray quote. His parser refused all of it, so he wrote his own tolerant parser by hand to read his file.
+When the standard tools won't bend, people build their own. In 2016 a developer named Pēteris was handed a few gigabytes of JSON, most of it fine but scattered with lines a strict parser rejects — a number written `45.`, a `nan` in place of `null`, a stray quote. His parser refused all of it, so he wrote his own tolerant parser by hand to read his file. I bet he would have wanted to spend the time on something more productive.
 
-Different problems, same shape: the data was there, and the tool discarded it because it wasn't exactly to spec.
+All these different problems have the same shape: the data was there, and the tool discarded it because it wasn't exactly to spec.
 
 ## The ask is small
 
@@ -37,7 +37,7 @@ The striking thing across years of these reports is how modest the request is. B
 
 > *"Comments, trailing commas, and 64-bit integers. That's all I want. Is that really so much? :("*
 
-That was 2015. The same request now covers everything new in how data arrives: read an NDJSON log or export without splitting it by hand; pull the JSON out of an LLM's reply, fences and prose included; take an HJSON-style config with its comments and unquoted keys.
+That was 2015. The same request now covers everything new in how data arrives: read an NDJSON log or export without splitting it by hand; pull the JSON out of an LLM's reply, fences and prose included; take HJSON-style data with its comments and unquoted keys.
 
 That's the whole list: read what's there, keep the data, report findings. Not a new format — a reader that takes a superset of JSON and processes it robustly.
 
@@ -63,7 +63,7 @@ Nobody decided JSON parsing should be this strict. It's a side effect of how par
 >
 > There's a mechanical reason strict parsers are so universal. You write the grammar in BNF, check its class — JSON's is **LL(1)**, one token of lookahead, the standard "simple enough to hand-write" case — open the Compiler Construction Book, and follow the recipe: a tokenizer feeding a parser that walks the grammar. The parser accepts exactly what fits the grammar and rejects everything else. Strictness isn't a decision; it's the result of using the standard algorithm. Leniency is the part you'd have to add deliberately.
 >
-> The deeper mismatch is older than JSON. That parsing algorithm was meant for programming languages, not for user data — for source code, strictness is correct: a misplaced comma in your code is a bug, and the compiler should stop. JSON parsers inherited that machinery, but user data isn't source code. A stray comma in a data file isn't a bug to reject because we don't know how to proceed - it's noise to read past. Same tools, opposite requirements.
+> The deeper mismatch is older than JSON. That parsing algorithm was meant for programming languages, not for user data — for source code, strictness is correct: a misplaced comma in your code is a bug, and the compiler should stop. JSON parsers inherited that machinery, but user data isn't source code. A stray comma in a data file isn't a bug to reject - it's noise to read past. Same tools, opposite requirements.
 >
 > Leniency can be designed in — the web already did it. HTML parsers are lenient by specification: HTML5 defines, step by step, how to handle broken markup instead of discarding it. Browsers have done this for two decades, on far messier input than a stray comma. As one developer put it: *"per specifications, json parsing is not lenient, html parsing is lenient."* **Leniency-by-design isn't a hack; it ships in every browser.**
 >
@@ -83,9 +83,9 @@ There's an architecture difference underneath. The usual way to add leniency is 
 
 ## Repair tools treat the symptom
 
-There is a segment of "JSON repair" libraries for JavaScript, Python, PHP, Ruby, ... to clean broken JSON before a strict parser will accept it. They're useful, but look at the shape: a pre-processing pass in front of a strict parser. The most aggressive ones go further and invent data — completing a truncated document with guessed values so it parses. And either you run that pre-processor on every input, which is expensive, or you do it as part of the error handling.
+There is a category of "JSON repair" libraries for JavaScript, Python, PHP, Ruby, ... to clean broken JSON before a strict parser will accept it. They're useful, but look at the shape: a pre-processing pass in front of a strict parser. The most aggressive ones go further and invent data — completing a truncated document with guessed values so it parses. And either you run that pre-processor on every input, which is expensive, or you do it as part of the error handling.
 
-That's treating the symptom. The strip-comments regex, the repair pass, the dialect flag — same move: keep the strict parser, bolt something on the front so reality can get through. That this segment exists is the clearest evidence that the strict-only model doesn't fit how JSON is produced and consumed today. The fix isn't pre-processing in front of the parser; it's a reader that doesn't need pre-processing, and that reliably returns only the data that's actually there.
+That's treating the symptom. The strip-comments regex, the repair pass, the dialect flag — same move: keep the strict parser, bolt something on the front so reality can get through. That this category exists is the clearest evidence that the strict-only model doesn't fit how JSON is produced and consumed today. The fix isn't pre-processing in front of the parser; it's a reader that doesn't need pre-processing, and that reliably returns only the data that's actually there.
 
 ## What a tool for this job looks like
 
