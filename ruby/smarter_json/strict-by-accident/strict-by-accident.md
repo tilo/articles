@@ -119,7 +119,7 @@ Fourteen addressed, three partial, two it won't do. The two "won'ts" are the poi
 
 The takeaway isn't that JSON parsers are bad. They're good at the job they were built for — recognizing source-code-grade input from a careful producer. That producer is mostly gone. A developer handed messy JSON should get their data and move on, the same way nobody hand-writes CSV parsing anymore.
 
-## Further reading — the receipts
+## Further reading
 
 - **LLM-generated JSON.** *Structured outputs from LLMs* — the "works 95% of the time, your downstream code crashes" problem: <https://www.aiwisdom.dev/articles/prompt-engineering/structured-outputs-from-llms>. OpenAI batch API, a valid `.jsonl` rejected over an invisible BOM: <https://community.openai.com/t/error-after-creating-batch-job-this-line-is-not-parseable-as-valid-json/728379>
 - **Strictness and the all-or-nothing failure.** Nicolas Seriot, *Parsing JSON Is a Minefield* (2016) — how much real parsers disagree: <https://seriot.ch/projects/parsing_json.html>. Pēteris Ņikiforovs, *Parsing malformed JSON* (2016) — the hand-rolled parser: <https://peteris.rocks/blog/parsing-malformed-json/>
