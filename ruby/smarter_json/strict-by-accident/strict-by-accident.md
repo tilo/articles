@@ -67,7 +67,7 @@ Nobody decided JSON parsing should be this strict. It's a side effect of how par
 >
 > Leniency can be designed in — the web already did it. HTML parsers are lenient by specification: HTML5 defines, step by step, how to handle broken markup instead of discarding it. Browsers have done this for two decades, on far messier input than a stray comma. As one developer put it: *"per specifications, json parsing is not lenient, html parsing is lenient."* **Leniency-by-design isn't a hack; it ships in every browser.**
 >
-> JSON parsers inherited the strict-by-default template and never revisited it. That's how an ecosystem ended up **strict almost by accident.**
+> JSON parsers inherited the strict-by-default template and never revisited it. That's how an ecosystem ended up strict by accident.
 
 ---
 
