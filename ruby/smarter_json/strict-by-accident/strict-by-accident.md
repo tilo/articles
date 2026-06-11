@@ -6,6 +6,7 @@ tags: 'ruby, json, parsing, programming'
 cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_json/strict-by-accident/images/smarter_json_1.1.1_image.png'
 slug: strict-by-accident
 id: 3875897
+date: '2026-06-11T17:42:08Z'
 ---
 
 I was importing a JSON file and it blew up. Not a subtle bug — the parser refused the whole thing. The cause was a single extra comma. After deleting it manually, the import worked.
