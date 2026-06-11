@@ -43,7 +43,7 @@ That's the whole list: read what's there, keep the data, report findings. Not a 
 
 ## A different starting point
 
-I built SmarterCSV on one principle: hand back all the usable data, so the user is successful. Rejecting a whole file over one comma is diametrically the opposite. Today's JSON parsers are just that — *parsers*: algorithms designed to police correctness, not maximize usability or user satisfaction.
+I built [SmarterCSV](https://github.com/tilo/smarter_csv) on one principle: hand back all the usable data, so the user is successful. Rejecting a whole file over one comma is diametrically the opposite. Today's JSON parsers are just that — *parsers*: algorithms designed to police correctness, not maximize usability or user satisfaction.
 
 ## Why isn't every parser built that way?
 
