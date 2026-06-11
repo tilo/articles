@@ -4,6 +4,7 @@ published: false
 description: 'JSON parsers reject the whole document over one stray comma — not because anyone chose strictness, but because they followed the textbook. Why JSON parsing ended up strict by accident, what developers actually complain about, and what a JSON tool built for today''s messy input would do.'
 tags: 'ruby, json, parsing, programming'
 slug: strict-by-accident
+id: 3875897
 ---
 
 I was importing a JSON file and it blew up. Not a subtle bug — the parser refused the whole thing. The cause was a single extra comma, after the last item in a list. I deleted it, and the import worked.
