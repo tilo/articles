@@ -89,6 +89,8 @@ That's treating the symptom. The strip-comments regex, the repair pass, the dial
 
 ## What a tool for this job looks like
 
+> "Tools should not stand in the way of the user. A data-ingestion library should enable you, not interrupt your work."
+
 I built one: [SmarterJSON](https://github.com/tilo/smarter_json), a JSON processor that focuses on data extraction, not policing of standards. It reads the messy-JSON superset with no modes and no flags — comments, trailing commas, unquoted keys, single quotes, NDJSON in one call, markdown-fenced LLM output — and returns typed, lossless data in one pass, reporting anything it fixed. High-precision numbers stay exact, not rounded to float. It will not invent data: truncated input fails, because the honest answer to "what was the rest?" is unknown. It doesn't validate your schema — that's a separate layer. (In fairness: Ruby's `json` is good and getting better; the difference is the whole superset with zero configuration, not any single feature.)
 
 Here's the honest scorecard against the complaints above:
