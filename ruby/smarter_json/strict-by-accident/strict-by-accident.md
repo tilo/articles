@@ -65,7 +65,7 @@ Nobody decided JSON parsing should be this strict. It's a side effect of how par
 >
 > The deeper mismatch is older than JSON. That parsing algorithm was meant for programming languages, not for user data — for source code, strictness is correct: a misplaced comma in your code is a bug, and the compiler should stop. JSON parsers inherited that machinery. But user data isn't source code. A stray comma in a data file isn't a bug to reject; it's noise to read past. Same tools, opposite requirements.
 >
-> Leniency can be designed in — the web already did it. HTML parsers are lenient by specification: HTML5 defines, step by step, how to handle broken markup instead of discarding it. Browsers have done this for two decades, on far messier input than a stray comma. As one developer put it: *"per specifications, json parsing is not lenient, html parsing is lenient."* Leniency-by-design isn't a hack; it ships in every browser.
+> Leniency can be designed in — the web already did it. HTML parsers are lenient by specification: HTML5 defines, step by step, how to handle broken markup instead of discarding it. Browsers have done this for two decades, on far messier input than a stray comma. As one developer put it: *"per specifications, json parsing is not lenient, html parsing is lenient."* **Leniency-by-design isn't a hack; it ships in every browser.**
 >
 > JSON parsers inherited the strict-by-default template and never revisited it. That's how an ecosystem ended up **strict almost by accident.**
 
