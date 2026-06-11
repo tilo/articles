@@ -1,6 +1,6 @@
 ---
 title: 'Strict by Accident: Your JSON Parser Isn''t Broken — It''s Answering the Wrong Question'
-published: false
+published: true
 description: 'JSON parsers reject the whole document over one stray comma — not because anyone chose strictness, but because they followed the textbook. Why JSON parsing ended up strict by accident, what developers actually complain about, and what a JSON tool built for today''s messy input would do.'
 tags: 'ruby, json, parsing, programming'
 cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_json/strict-by-accident/images/smarter_json_1.1.1_image.png'
@@ -8,9 +8,9 @@ slug: strict-by-accident
 id: 3875897
 ---
 
-I was importing a JSON file and it blew up. Not a subtle bug — the parser refused the whole thing. The cause was a single extra comma, after the last item in a list. I deleted it, and the import worked.
+I was importing a JSON file and it blew up. Not a subtle bug — the parser refused the whole thing. The cause was a single extra comma. After deleting it manually, the import worked.
 
-The comma wasn't the problem. The all-or-nothing was: 99% good data thrown out over one byte. So I went looking to see if it was just me.
+The comma wasn't the problem. The problem was the manual fix, and the all-or-nothing of it: 99% good data thrown out over one byte. So I went looking to see if it was just me.
 
 It wasn't. The same problem shows up again and again — in JavaScript, Python, Ruby, Go, and more. The shape is always the same: the data is there, and the parser throws all of it away because one byte is off-spec.
 
@@ -38,7 +38,7 @@ The striking thing across years of these reports is how modest the request is. B
 
 That was 2015. The same request now covers everything new in how data arrives: read an NDJSON log or export without splitting it by hand; pull the JSON out of an LLM's reply, fences and prose included; take an HJSON-style config with its comments and unquoted keys.
 
-That's the whole list. Read what I meant. Don't lose my data over punctuation. Tell me what you fixed. It's not a request for a new format — it's a request for a reader that handles real-world input.
+That's the whole list: read what's there, keep the data, report findings. Not a new format — a reader that takes a superset of JSON and processes it robustly.
 
 ## A different starting point
 
@@ -48,7 +48,7 @@ I built SmarterCSV on one principle: hand back all the usable data, so the user 
 
 The answer is in the word: it's a *parser*. A parser answers one question — does this input conform to the grammar, yes or no? That is **recognition**. It's the right question when you're checking that a machine produced spec-clean output. It's the wrong question when you have no control over who generates the input and you want the data out of it. That second job is **extraction**.
 
-Recognition and extraction pull in opposite directions. A recognizer's correct answer to "there's a comma on line 147" is a *"no"* — reject the document. An extractor's correct answer is: *"here's your data; I ignored a comma on line 147."* Same input, opposite result. Most of the time you wanted the second one.
+Recognition and extraction pull in opposite directions. A recognizer's correct answer to "there's a comma on line 147" is a *no* — reject the document. An extractor's correct answer is: *"here's your data; I ignored a comma on line 147."* Same input, opposite result. Most of the time you want the second one.
 
 Nobody decided JSON parsing should be this strict. It's a side effect of how parsers are built historically.
 
@@ -56,13 +56,13 @@ Nobody decided JSON parsing should be this strict. It's a side effect of how par
 
 > ### Sidebar — How JSON parsing got strict
 >
-> JSON was built around 2001 to move data between machines. Strictness was correct then: the producer was a program, so a stray comma meant a bug — you'd want the parser to stop and point at it. Strict parsing bet that the producer was careful.
+> JSON was built around 2001 to move data between machines. Strictness was correct then: the producer was a program, so a stray comma meant a bug — you'd want the parser to stop and point at it. Strict parsing assumed the producer was careful.
 >
-> Two decades changed the producer: now a human editing a config, an LLM emitting almost-JSON, a vendor exporting its own dialect. The bet no longer holds.
+> Two decades changed the producer: a vendor exporting its own JSON dialect, a human editing a config, an LLM emitting almost-JSON. The premise no longer holds.
 >
-> There's a mechanical reason strictness is universal. You write the grammar in BNF, read off its class — JSON's is **LL(1)**, one token of lookahead, the standard "simple enough to hand-write" case — open the Dragon Book, and follow the recipe: a tokenizer feeding a parser that walks the grammar. The result accepts exactly what fits the grammar and rejects everything else. Strictness isn't a decision; it's the output of the standard procedure. Leniency is the part you'd have to add deliberately.
+> There's a mechanical reason strictness is universal. You write the grammar in BNF, read off its class — JSON's is **LL(1)**, one token of lookahead, the standard "simple enough to hand-write" case — open the Compiler Construction Book, and follow the recipe: a tokenizer feeding a parser that walks the grammar. The result accepts exactly what fits the grammar and rejects everything else. Strictness isn't a decision; it's the output of the standard procedure. Leniency is the part you'd have to add deliberately.
 >
-> The deeper mismatch is older than JSON. These are the same algorithms we use to parse programming languages — and for source code, strictness is correct: a misplaced comma in your code is a bug, and the compiler should stop. JSON parsers inherited that machinery. But user data isn't source code. A stray comma in a data file isn't a bug to reject; it's noise to read past. Same tools, opposite requirements.
+> The deeper mismatch is older than JSON. That parsing algorithm was meant for programming languages, not for user data — for source code, strictness is correct: a misplaced comma in your code is a bug, and the compiler should stop. JSON parsers inherited that machinery. But user data isn't source code. A stray comma in a data file isn't a bug to reject; it's noise to read past. Same tools, opposite requirements.
 >
 > Leniency can be designed in — the web already did it. HTML parsers are lenient by specification: HTML5 defines, step by step, how to handle broken markup instead of discarding it. Browsers have done this for two decades, on far messier input than a stray comma. As one developer put it: *"per specifications, json parsing is not lenient, html parsing is lenient."* Leniency-by-design isn't a hack; it ships in every browser.
 >
@@ -72,9 +72,9 @@ Nobody decided JSON parsing should be this strict. It's a side effect of how par
 
 ## Stop making people pick a mode
 
-Some parsers offer a way to bend: a flag for trailing commas, another for `NaN`, a dialect setting. That's the wrong model, because in production you can't inspect every payload and decide which mode to enable. The input comes from somewhere you don't control and can't predict. A tool that asks you to declare the input's shape up front has handed the impossible part back to you.
+Some parsers offer a way to bend: a flag for trailing commas, another for `NaN`, a dialect setting. That's the wrong model, because in production you can't inspect every payload and decide which mode to enable, and an avoidable production failure is the last thing you want. The input comes from somewhere you don't control and can't predict. A tool that asks you to declare the input's shape up front has handed the impossible part back to you.
 
-And the flags don't get you there. Ruby's standard `json` library has grown more tolerant, but hand it a JSON5 file and it fails even with every leniency option turned on — because unquoted keys and single quotes have no flag at all. You can't configure your way to "read what I was handed."
+And the flags don't get you there. Ruby's standard `json` library has grown more tolerant, but hand it a JSON5 or NDJSON file and it fails even with every leniency option turned on — because unquoted keys and single quotes have no flag at all. You can't configure your way to "read what I was handed."
 
 The fix isn't more flags. It's a different default: one set of safe rules that adapts to whatever arrives, with no mode to pick. Strict JSON is then just the narrowest case of a larger superset the reader already accepts.
 
@@ -88,7 +88,7 @@ That's treating the symptom. The strip-comments regex, the repair pass, the dial
 
 ## What a tool for this job looks like
 
-I built one: [SmarterJSON](https://github.com/tilo/smarter_json), a JSON processor that starts from extraction, not recognition. It reads the messy-JSON superset with no modes and no flags — comments, trailing commas, unquoted keys, single quotes, NDJSON in one call, markdown-fenced LLM output — and returns typed, lossless data in one pass, reporting anything it fixed. It will not invent data: truncated input fails, because the honest answer to "what was the rest?" is unknown. It doesn't validate your schema — that's a separate layer. (In fairness: Ruby's `json` is good and getting better; the difference is the whole superset with zero configuration, not any single feature.)
+I built one: [SmarterJSON](https://github.com/tilo/smarter_json), a JSON processor that focuses on data extraction, not policing of standards. It reads the messy-JSON superset with no modes and no flags — comments, trailing commas, unquoted keys, single quotes, NDJSON in one call, markdown-fenced LLM output — and returns typed, lossless data in one pass, reporting anything it fixed. High-precision numbers stay exact, not rounded to float. It will not invent data: truncated input fails, because the honest answer to "what was the rest?" is unknown. It doesn't validate your schema — that's a separate layer. (In fairness: Ruby's `json` is good and getting better; the difference is the whole superset with zero configuration, not any single feature.)
 
 Here's the honest scorecard against the complaints above:
 
@@ -107,7 +107,7 @@ Here's the honest scorecard against the complaints above:
 | **T11** | Hand-editing JSON is painful                                      | Addressed — comments, unquoted keys, implicit root    |
 | **T12** | Parses fine but wrong type (`"42"` vs `42`)                       | Not — by design — that's a schema's job               |
 | **T13** | Truncated / cut-off JSON                                          | Not — by design — won't invent missing data           |
-| **T14** | Every tool reinvents JSON handling with its own bugs              | Addressed (in Ruby's lane)                            |
+| **T14** | Every tool reinvents JSON handling with its own bugs              | Addressed for Ruby (not other languages)              |
 | **T15** | No Date / extended types (MongoDB `ObjectId`, …)                  | Partial — big ints safe; dates are a schema's job     |
 | **T16** | Dialect fragmentation (JSON5 / JSONC / HJSON / …)                 | Addressed — one superset, no dialect to pick          |
 | **T17** | Leniency assumed to cost speed                                    | Addressed — lenient and fast                          |
