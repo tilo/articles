@@ -3,6 +3,7 @@ title: 'Strict by Accident: Your JSON Parser Isn''t Broken — It''s Answering t
 published: false
 description: 'JSON parsers reject the whole document over one stray comma — not because anyone chose strictness, but because they followed the textbook. Why JSON parsing ended up strict by accident, what developers actually complain about, and what a JSON tool built for today''s messy input would do.'
 tags: 'ruby, json, parsing, programming'
+cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_json/strict-by-accident/images/smarter_json_1.1.1_image.png'
 slug: strict-by-accident
 ---
 
@@ -54,11 +55,9 @@ Nobody decided JSON parsing should be this strict. It's a side effect of how par
 
 > ### Sidebar — How JSON parsing got strict
 >
-> JSON was designed around 2001 to move data between machines; larger adoption by 2005–06; then **RFC 4627**, ECMA-404, and finally **RFC 8259** followed.
+> JSON was built around 2001 to move data between machines. Strictness was correct then: the producer was a program, so a stray comma meant a bug — you'd want the parser to stop and point at it. Strict parsing bet that the producer was careful.
 >
-> In the early 2000's, strictness was correct. The producer was a program. A program that emits a stray comma doesn't have messy-but-usable data — it has a bug, and you want the parser to stop and point at it. Strict parsing was a reasonable bet that the producer is careful. (Even the spec loosened over time: in 2014, RFC 7159 made a bare string or number a valid JSON text.)
->
-> Two decades changed the producer. It's now a human editing a config, an LLM emitting almost-JSON, a vendor exporting its own dialect, a tool that calls everything `.json` regardless of flavor.
+> Two decades changed the producer: now a human editing a config, an LLM emitting almost-JSON, a vendor exporting its own dialect. The bet no longer holds.
 >
 > There's a mechanical reason strictness is universal. You write the grammar in BNF, read off its class — JSON's is **LL(1)**, one token of lookahead, the standard "simple enough to hand-write" case — open the Dragon Book, and follow the recipe: a tokenizer feeding a parser that walks the grammar. The result accepts exactly what fits the grammar and rejects everything else. Strictness isn't a decision; it's the output of the standard procedure. Leniency is the part you'd have to add deliberately.
 >
