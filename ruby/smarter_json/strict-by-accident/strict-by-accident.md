@@ -3,7 +3,6 @@ title: 'Strict by Accident: Your JSON Parser Isn''t Broken — It''s Answering t
 published: false
 description: 'JSON parsers reject the whole document over one stray comma — not because anyone chose strictness, but because they followed the textbook. Why JSON parsing ended up strict by accident, what developers actually complain about, and what a JSON tool built for today''s messy input would do.'
 tags: 'ruby, json, parsing, programming'
-cover_image: 'https://raw.githubusercontent.com/tilo/articles/main/ruby/smarter_json/strict-by-accident/images/strict-by-accident.png'
 slug: strict-by-accident
 ---
 
