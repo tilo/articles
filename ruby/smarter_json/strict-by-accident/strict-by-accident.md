@@ -83,9 +83,9 @@ There's an architecture difference underneath. The usual way to add leniency is 
 
 ## Repair tools treat the symptom
 
-A small industry of "JSON repair" libraries exists — JavaScript, Python, PHP, Ruby — to clean broken JSON before a strict parser will accept it. They're useful, but look at the shape: a patch in front of a strict parser. The most aggressive ones go further and invent data — completing a truncated document with guessed values so it parses.
+There is a segment of "JSON repair" libraries for JavaScript, Python, PHP, Ruby, ... to clean broken JSON before a strict parser will accept it. They're useful, but look at the shape: a pre-processing pass in front of a strict parser. The most aggressive ones go further and invent data — completing a truncated document with guessed values so it parses.
 
-That's treating the symptom. The strip-comments regex, the repair pass, the dialect flag — same move: keep the strict parser, bolt something on the front so reality can get through. That this industry exists is the clearest evidence that the strict-only model doesn't fit how JSON is produced now. The fix isn't a better patch in front of the parser; it's a reader that didn't need one, and that returns only the data that's actually there.
+That's treating the symptom. The strip-comments regex, the repair pass, the dialect flag — same move: keep the strict parser, bolt something on the front so reality can get through. That this segment exists is the clearest evidence that the strict-only model doesn't fit how JSON is produced now. The fix isn't a better patch in front of the parser; it's a reader that doesn't need one, and that reliably returns only the data that's actually there.
 
 ## What a tool for this job looks like
 
