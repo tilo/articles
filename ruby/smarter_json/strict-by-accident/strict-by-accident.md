@@ -45,7 +45,7 @@ That's the whole list: read what's there, keep the data, report findings. Not a 
 
 SmarterCSV taught me one principle: hand back all the usable data, so the user is successful — avoid pre- or post-processing. Rejecting a whole file over one comma is diametrically the opposite. Today's JSON parsers are just that — *parsers*: algorithms designed to police correctness, not maximize usability or user satisfaction.
 
-## Why isn't every parser built that way?
+## Why is every parser built that way?
 
 The answer is in the word: it's a *parser*. A parser answers one question — does this input conform to the grammar, yes or no? That is **recognition**. It's the right question when you're checking that a machine produced spec-clean output. It's the wrong question when you have no control over who generates the input and you want the data out of it. That second job is **extraction**.
 
