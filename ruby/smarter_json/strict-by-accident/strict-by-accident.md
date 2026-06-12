@@ -61,7 +61,7 @@ Nobody decided JSON parsing should be this strict. It's a side effect of how par
 >
 > Two decades changed the producer: a vendor exporting its own JSON dialect, a human editing a config, an LLM emitting almost-JSON. The premise no longer holds.
 >
-> There's a mechanical reason strict parsers are so universal. You write the grammar in BNF, check its class — JSON's is **LL(1)**, one token of lookahead, the standard "simple enough to hand-write" case — open the Compiler Construction Book, and follow the recipe: a tokenizer feeding a parser that walks the grammar. The parser accepts exactly what fits the grammar and rejects everything else. Strictness isn't a decision; it's the result of using the standard algorithm. Leniency is the part you'd have to add deliberately.
+> There's a structural reason strict parsers are so universal. You write the grammar in BNF, check its class — JSON's is **LL(1)**, one token of lookahead, the standard "simple enough to hand-write" case — open the Compiler Construction Book, and follow the recipe: a tokenizer feeding a parser that walks the grammar. The parser accepts exactly what fits the grammar and rejects everything else. Strictness isn't a decision; it's the result of using the standard algorithm. Leniency is the part you'd have to add deliberately.
 >
 > The deeper mismatch is older than JSON. That parsing algorithm was meant for programming languages, not for user data — for source code, strictness is correct: a misplaced comma in your code is a bug, and the compiler should stop. JSON parsers inherited that machinery, but user data isn't source code. A stray comma in a data file isn't a bug to reject - it's noise to read past. Same tools, opposite requirements.
 >
