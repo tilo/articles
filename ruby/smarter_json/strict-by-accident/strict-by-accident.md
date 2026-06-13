@@ -91,7 +91,7 @@ That's treating the symptom. The strip-comments regex, the repair pass, the dial
 
 > "Tools should not stand in the way of the user. A data-ingestion library should enable you, not interrupt your work."
 
-I built one: [SmarterJSON](https://github.com/tilo/smarter_json), a JSON processor that focuses on data extraction, not policing of standards. It reads the messy-JSON superset with no modes and no flags — comments, trailing commas, unquoted keys, single quotes, NDJSON in one call, markdown-fenced LLM output — and returns typed, lossless data in one pass, reporting anything it fixed. High-precision numbers stay exact, not rounded to float. It will not invent data: truncated input fails, because the honest answer to "what was the rest?" is unknown. It doesn't validate your schema — that's a separate layer. (In fairness: Ruby's `json` is good and getting better; the difference is the whole superset with zero configuration, not any single feature.)
+I built one: [SmarterJSON](https://github.com/tilo/smarter_json), a JSON processor that focuses on data extraction, not policing of standards. It reads the messy-JSON superset with no modes and no flags — comments, trailing commas, unquoted keys, single quotes, NDJSON in one call, markdown-fenced LLM output — and returns typed, lossless data in one pass, reporting any issues it encountered. High-precision numbers stay exact, not rounded to float. It will not invent data: truncated input fails, because the honest answer to "what was the rest?" is unknown. It doesn't validate your schema — that's a separate layer. (In fairness: Ruby's `json` is good and getting better; the difference is the whole superset with zero configuration, not any single feature.)
 
 Here's the honest scorecard against the complaints above:
 
@@ -105,7 +105,7 @@ Here's the honest scorecard against the complaints above:
 | High-precision numbers silently rounded to Float                  | Addressed — BigDecimal by default, Float opt-in       |
 | Duplicate keys = undefined behavior (and a security footgun)      | Addressed — explicit policy, every duplicate reported |
 | Strict parsers are the wrong default for input you don't control  | Addressed — the core idea                             |
-| Weak diagnostics — "it fixed something but I don't know what"     | Addressed — line/column + a warning per fix           |
+| Weak diagnostics — "it fixed something but I don't know what"     | Addressed — line/column + a warning per issue         |
 | A single huge document exhausts memory                            | Partial — multi-doc streams; single huge doc post-1.0 |
 | Hand-editing JSON is painful                                      | Addressed — comments, unquoted keys, implicit root    |
 | Parses fine but wrong type (`"42"` vs `42`)                       | Not — by design — that's a schema's job               |
